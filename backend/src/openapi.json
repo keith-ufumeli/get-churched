@@ -1,0 +1,190 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Get Churched API",
+    "description": "Backend API for the Get Churched faith-based party game. Card generation, sessions, and leaderboard.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3001", "description": "Development" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns server status. Used by frontend to check API availability.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "status": { "type": "string", "example": "ok" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/generate": {
+      "post": {
+        "summary": "Generate a card",
+        "description": "Returns a card for the given mode. Uses Gemini API or built-in deck (70/30 split).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["mode"],
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["sing", "act", "explain", "trivia", "hum", "whoami", "fillinblank", "taboo", "oneword", "draw"],
+                    "description": "Card game mode"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Card (string for simple modes, object for trivia/fillinblank/taboo)"
+          },
+          "400": { "description": "Invalid or missing mode" }
+        }
+      }
+    },
+    "/api/sessions": {
+      "post": {
+        "summary": "Save a session",
+        "description": "Saves a completed game session to MongoDB.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Session" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "sessionId": { "type": "string" } }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid body" },
+          "409": { "description": "Session already exists" }
+        }
+      }
+    },
+    "/api/sessions/{id}": {
+      "get": {
+        "summary": "Get session by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Session" } }
+            }
+          },
+          "404": { "description": "Session not found" }
+        }
+      }
+    },
+    "/api/leaderboard": {
+      "get": {
+        "summary": "Get leaderboard entries",
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["score"] } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of leaderboard entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/LeaderboardEntry" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add leaderboard entry",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["displayName", "score"],
+                "properties": {
+                  "displayName": { "type": "string" },
+                  "teamName": { "type": "string" },
+                  "score": { "type": "number" },
+                  "sessionId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LeaderboardEntry" } }
+            }
+          },
+          "400": { "description": "Invalid body" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Session": {
+        "type": "object",
+        "properties": {
+          "sessionId": { "type": "string" },
+          "playedAt": { "type": "string", "format": "date-time" },
+          "teams": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "name": { "type": "string" }, "color": { "type": "string" }, "score": { "type": "number" } }
+            }
+          },
+          "rounds": { "type": "array", "items": { "type": "object" } },
+          "winner": { "type": "string" },
+          "totalRounds": { "type": "number" }
+        }
+      },
+      "LeaderboardEntry": {
+        "type": "object",
+        "properties": {
+          "displayName": { "type": "string" },
+          "teamName": { "type": "string" },
+          "score": { "type": "number" },
+          "sessionId": { "type": "string" },
+          "achievedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}
