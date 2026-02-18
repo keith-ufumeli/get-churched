@@ -14,12 +14,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'START_GAME':
       return { ...state, ...action.payload, status: 'playing' }
-    case 'SCORE_ROUND':
+    case 'SCORE_ROUND': {
+      const updatedTeams = state.teams.map((team) =>
+        team.name === action.payload.teamName
+          ? { ...team, score: (team.score || 0) + (action.payload.pointsEarned || 0) }
+          : team
+      )
       return {
         ...state,
+        teams: updatedTeams,
         rounds: [...state.rounds, action.payload],
         currentTeamIndex: (state.currentTeamIndex + 1) % state.teams.length,
       }
+    }
     case 'END_GAME':
       return { ...state, status: 'finished' }
     case 'RESET':
