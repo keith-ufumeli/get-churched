@@ -31,7 +31,7 @@ export function ScoreboardPage() {
 
   const { data: leaderboard = [] } = useQuery({
     queryKey: ['leaderboard'],
-    queryFn: fetchLeaderboard,
+    queryFn: () => fetchLeaderboard(10),
   })
 
   const saveMutation = useMutation({
