@@ -18,6 +18,13 @@ router.post('/generate', async (req, res, next) => {
     let card = null;
     if (useGemini) {
       card = await geminiService.generateCard(mode);
+      if (card != null) {
+        console.log('[Gemini] Card generated for mode:', mode);
+      } else {
+        console.log('[Gemini] No response or error, using built-in deck for mode:', mode);
+      }
+    } else {
+      console.log('[Gemini] Using built-in deck (skip Gemini) for mode:', mode);
     }
 
     if (card == null) {
