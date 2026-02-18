@@ -14,6 +14,25 @@ React + Vite SPA for **Get Churched**: 10 game modes, shared-device play, and UI
 - **Routing:** React Router v6
 - **Icons:** lucide-react
 
+### Motion design
+
+**Core animation**
+
+| Package | Role |
+|--------|------|
+| **framer-motion** | Layout animations, transitions, page transitions, drag |
+| **tailwindcss-animate** | Utility animations (used by shadcn) |
+| **react-use-measure** | Auto height animations |
+| **clsx** + **tailwind-merge** | Clean class handling |
+
+**Optional enhancers**
+
+| Package | Role |
+|--------|------|
+| **react-hot-toast** | Animated toasts |
+| **use-sound** | Subtle game sounds |
+| **react-confetti** | Winner celebration |
+
 ---
 
 ## Setup
