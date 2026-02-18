@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useGame } from '@/hooks/useGame'
 import { useCard } from '@/hooks/useCard'
 import { ScoreBoard } from '@/components/game/ScoreBoard'
+import { ModeSelectionScreen } from '@/components/game/ModeSelectionScreen'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { CardMode, CardResponse } from '@/types/game'
@@ -21,23 +22,7 @@ import {
 } from '@/components/cards'
 import { Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-const GAME_MODES: CardMode[] = [
-  'sing',
-  'act',
-  'explain',
-  'trivia',
-  'hum',
-  'whoami',
-  'fillinblank',
-  'taboo',
-  'oneword',
-  'draw',
-]
-
-function getRandomMode(): CardMode {
-  return GAME_MODES[Math.floor(Math.random() * GAME_MODES.length)]
-}
+import { MODE_LABELS } from '@/lib/gameModes'
 
 function CardRenderer({ card, mode, onScore }: { card: CardResponse; mode: CardMode; onScore: (points: number) => void }) {
   switch (mode) {
@@ -71,22 +56,13 @@ export function RoundPage() {
   const { state, dispatch } = useGame()
   const { mutate: generateCard, isPending, card, error } = useCard()
   const [mode, setMode] = useState<CardMode | null>(null)
-  const initialLoadDone = useRef(false)
+  const [roundPhase, setRoundPhase] = useState<'selecting' | 'playing'>('selecting')
 
   useEffect(() => {
     if (state.status !== 'playing') {
       navigate('/setup')
-      return
     }
-    if (initialLoadDone.current) return
-    initialLoadDone.current = true
-    const randomMode = getRandomMode()
-    const id = setTimeout(() => {
-      setMode(randomMode)
-      generateCard(randomMode)
-    }, 0)
-    return () => clearTimeout(id)
-  }, [state.status, navigate, generateCard])
+  }, [state.status, navigate])
 
   useEffect(() => {
     if (error) {
@@ -96,6 +72,12 @@ export function RoundPage() {
       }, 1000)
     }
   }, [error, generateCard, mode])
+
+  const handleModeSelect = (selectedMode: CardMode) => {
+    setMode(selectedMode)
+    generateCard(selectedMode)
+    setRoundPhase('playing')
+  }
 
   const handleScore = (points: number) => {
     if (!mode || !card) return
@@ -147,22 +129,33 @@ export function RoundPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {isPending || !card || !mode ? (
-              <Card className="p-12 flex items-center justify-center min-h-[400px]">
-                <div className="text-center space-y-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-mahogany mx-auto" />
-                  <p className="text-warmBrown">Loading card...</p>
-                </div>
-              </Card>
+            {roundPhase === 'selecting' ? (
+              <ModeSelectionScreen
+                currentTeamName={currentTeam?.name ?? ''}
+                onSelectMode={handleModeSelect}
+              />
             ) : (
-              <motion.div
-                key={`${mode}-${String(card)}`}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <CardRenderer card={card} mode={mode} onScore={handleScore} />
-              </motion.div>
+              <>
+                {isPending || !card || !mode ? (
+                  <Card className="p-12 flex items-center justify-center min-h-[400px]">
+                    <div className="text-center space-y-4">
+                      <Loader2 className="h-12 w-12 animate-spin text-mahogany mx-auto" />
+                      <p className="text-warmBrown">
+                        Loading your {mode ? MODE_LABELS[mode] : ''} card...
+                      </p>
+                    </div>
+                  </Card>
+                ) : (
+                  <motion.div
+                    key={`${mode}-${String(card)}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <CardRenderer card={card} mode={mode} onScore={handleScore} />
+                  </motion.div>
+                )}
+              </>
             )}
           </div>
 

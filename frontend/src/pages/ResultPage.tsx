@@ -10,19 +10,8 @@ import { cn } from '@/lib/utils'
 import { CheckCircle2, XCircle, ArrowRight, Trophy } from 'lucide-react'
 import Confetti from 'react-confetti'
 import { useState } from 'react'
-
-const MODE_LABELS: Record<string, string> = {
-  sing: 'Sing',
-  act: 'Act',
-  explain: 'Explain',
-  trivia: 'Trivia',
-  hum: 'Hum',
-  whoami: 'Who Am I',
-  fillinblank: 'Fill in Blank',
-  taboo: 'Taboo',
-  oneword: 'One Word',
-  draw: 'Draw',
-}
+import { MODE_LABELS } from '@/lib/gameModes'
+import { THEME_COLORS } from '@/lib/themeColors'
 
 export function ResultPage() {
   const navigate = useNavigate()
@@ -135,8 +124,8 @@ export function ResultPage() {
                     </p>
                     <motion.p
                       key={lastRound.pointsEarned}
-                      initial={{ scale: 1.2, color: '#D97706' }}
-                      animate={{ scale: 1, color: '#4A1C0E' }}
+                      initial={{ scale: 1.2, color: THEME_COLORS.gold }}
+                      animate={{ scale: 1, color: THEME_COLORS.mahogany }}
                       className="text-3xl font-bold text-mahogany"
                     >
                       +{lastRound.pointsEarned} points

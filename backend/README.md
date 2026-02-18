@@ -29,7 +29,7 @@ Create a `.env` file in this directory (do not commit it):
 PORT=3001
 MONGO_URI=mongodb://localhost:27017/get-churched
 GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_TOP_UP_RATE=0.3
 ALLOWED_ORIGIN=http://localhost:5173
 ```
@@ -39,7 +39,7 @@ ALLOWED_ORIGIN=http://localhost:5173
 | `PORT` | Server port (default `3001`) |
 | `MONGO_URI` | MongoDB connection string |
 | `GEMINI_API_KEY` | API key from [Google AI Studio](https://aistudio.google.com/apikey) |
-| `GEMINI_MODEL` | Model ID (e.g. `gemini-1.5-flash` or `gemini-1.5-pro`) |
+| `GEMINI_MODEL` | Model ID (e.g. `gemini-2.5-flash` or `gemini-2.5-pro`) |
 | `GEMINI_TOP_UP_RATE` | Fraction of card draws that use Gemini (e.g. `0.3` = 30%) |
 | `ALLOWED_ORIGIN` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
 

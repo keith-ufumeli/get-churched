@@ -7,6 +7,10 @@ const config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['Nunito', 'Lato', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  			serif: ['EB Garamond', 'Palatino Linotype', 'Georgia', 'serif'],
+  		},
   		colors: {
   			parchment: '#F5ECD7',
   			cream: '#FDF6E3',

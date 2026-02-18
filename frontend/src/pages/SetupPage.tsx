@@ -66,6 +66,40 @@ export function SetupPage() {
       className={cn('min-h-screen bg-parchment p-6 font-sans')}
     >
       <div className="max-w-2xl mx-auto">
+        {/* Step progress indicator */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="flex items-center gap-2">
+            {(['welcome', 'teams', 'rounds'] as OnboardingStep[]).map((s, index) => {
+              const isActive = step === s
+              const isPast =
+                (s === 'welcome' && (step === 'teams' || step === 'rounds')) ||
+                (s === 'teams' && step === 'rounds')
+              return (
+                <div key={s} className="flex items-center gap-2">
+                  <motion.div
+                    animate={{
+                      backgroundColor: isActive ? '#C9963A' : isPast ? '#6B3A2A' : '#D1C4B0',
+                      scale: isActive ? 1.25 : 1,
+                    }}
+                    transition={{ duration: 0.25 }}
+                    className="w-3 h-3 rounded-full"
+                  />
+                  {index < 2 && (
+                    <motion.div
+                      animate={{ backgroundColor: isPast ? '#6B3A2A' : '#D1C4B0' }}
+                      transition={{ duration: 0.25 }}
+                      className="w-10 h-px"
+                    />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-sm text-warmBrown mt-3">
+            Step {step === 'welcome' ? 1 : step === 'teams' ? 2 : 3} of 3
+          </p>
+        </div>
+
         <AnimatePresence mode="wait">
           {step === 'welcome' && (
             <motion.div
@@ -126,7 +160,6 @@ export function SetupPage() {
                   teams={teams}
                   onAddTeam={handleAddTeam}
                   onRemoveTeam={handleRemoveTeam}
-                  onStartGame={() => {}}
                 />
                 {teams.length >= 2 && (
                   <motion.div

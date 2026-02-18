@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Team } from '@/types/game'
 import { Trophy } from 'lucide-react'
+import { THEME_COLORS } from '@/lib/themeColors'
 
 interface ScoreBoardProps {
   teams: Team[]
@@ -62,8 +63,8 @@ export function ScoreBoard({ teams, currentTeamIndex, className }: ScoreBoardPro
                     </div>
                     <motion.div
                       key={team.score || 0}
-                      initial={{ scale: 1.2, color: '#D97706' }}
-                      animate={{ scale: 1, color: '#4A1C0E' }}
+                      initial={{ scale: 1.2, color: THEME_COLORS.gold }}
+                      animate={{ scale: 1, color: THEME_COLORS.mahogany }}
                       className="text-2xl font-bold text-mahogany tabular-nums"
                     >
                       {team.score || 0}

@@ -20,11 +20,10 @@ interface TeamSetupProps {
   teams: Team[]
   onAddTeam: (team: Team) => void
   onRemoveTeam: (index: number) => void
-  onStartGame: () => void
   className?: string
 }
 
-export function TeamSetup({ teams, onAddTeam, onRemoveTeam, onStartGame, className }: TeamSetupProps) {
+export function TeamSetup({ teams, onAddTeam, onRemoveTeam, className }: TeamSetupProps) {
   const [teamName, setTeamName] = useState('')
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined)
 
@@ -39,8 +38,6 @@ export function TeamSetup({ teams, onAddTeam, onRemoveTeam, onStartGame, classNa
       setSelectedColor(undefined)
     }
   }
-
-  const canStart = teams.length >= 2
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -121,25 +118,6 @@ export function TeamSetup({ teams, onAddTeam, onRemoveTeam, onStartGame, classNa
         )}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Button
-          onClick={onStartGame}
-          disabled={!canStart}
-          className="w-full"
-          size="lg"
-        >
-          Start Game
-        </Button>
-        {!canStart && teams.length > 0 && (
-          <p className="text-sm text-warmBrown text-center mt-2">
-            Add at least one more team to start
-          </p>
-        )}
-      </motion.div>
     </div>
   )
 }

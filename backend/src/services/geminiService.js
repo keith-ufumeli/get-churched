@@ -25,23 +25,35 @@ const JSON_MODES = ['trivia', 'fillinblank', 'taboo'];
  * @returns {Promise<string|object|null>} Card content or null
  */
 async function generateCard(mode) {
-  if (!genAI) return null;
+  if (!genAI) {
+    console.log('[Gemini] No API key configured, skipping Gemini');
+    return null;
+  }
   const prompt = PROMPTS[mode] || PROMPTS.explain;
   try {
     const model = genAI.getGenerativeModel({
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       generationConfig: { maxOutputTokens: 300 },
     });
     const result = await model.generateContent(prompt);
     const text = result.response?.text?.()?.trim() || '';
-    if (!text) return null;
+    if (!text) {
+      console.log('[Gemini] Empty response from API for mode:', mode);
+      return null;
+    }
 
     if (JSON_MODES.includes(mode)) {
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      return JSON.parse(cleaned);
+      try {
+        const cleaned = text.replace(/```json|```/g, '').trim();
+        return JSON.parse(cleaned);
+      } catch (parseErr) {
+        console.log('[Gemini] JSON parse error for mode:', mode, 'Response:', text.substring(0, 100));
+        return null;
+      }
     }
     return text;
   } catch (err) {
+    console.log('[Gemini] API error for mode:', mode, 'Error:', err.message || err);
     return null;
   }
 }

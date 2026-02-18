@@ -7,45 +7,7 @@ import { cn } from '@/lib/utils'
 import type { CardMode, CardResponse } from '@/types/game'
 import { Timer } from '@/components/game/Timer'
 import { useTimer } from '@/hooks/useTimer'
-
-const MODE_COLORS: Record<CardMode, string> = {
-  sing: '#FFD700',
-  act: '#DC2626',
-  explain: '#2563EB',
-  trivia: '#16A34A',
-  hum: '#9333EA',
-  whoami: '#FB923C',
-  fillinblank: '#14B8A6',
-  taboo: '#DC2626',
-  oneword: '#1E3A8A',
-  draw: '#F59E0B',
-}
-
-const MODE_LABELS: Record<CardMode, string> = {
-  sing: 'Sing',
-  act: 'Act',
-  explain: 'Explain',
-  trivia: 'Trivia',
-  hum: 'Hum',
-  whoami: 'Who Am I',
-  fillinblank: 'Fill in Blank',
-  taboo: 'Taboo',
-  oneword: 'One Word',
-  draw: 'Draw',
-}
-
-const MODE_DURATIONS: Record<CardMode, number> = {
-  sing: 60,
-  act: 60,
-  explain: 60,
-  trivia: 0,
-  hum: 60,
-  whoami: 90,
-  fillinblank: 0,
-  taboo: 60,
-  oneword: 30,
-  draw: 90,
-}
+import { MODE_COLORS, MODE_LABELS, MODE_DURATIONS } from '@/lib/gameModes'
 
 interface BaseCardProps {
   card: CardResponse
