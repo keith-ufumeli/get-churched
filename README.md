@@ -1,6 +1,6 @@
 # ✟ Get Churched
 
-A faith-based digital party game — a web adaptation of the KultureGames *Get ChurchED* card game. Play with **10 interactive game modes**, AI-generated cards via the Anthropic Claude API, team management, score tracking, and session history stored in MongoDB.
+A faith-based digital party game — a web adaptation of the KultureGames *Get ChurchED* card game. Play with **10 interactive game modes**, AI-generated cards via the Google Gemini API, team management, score tracking, and session history stored in MongoDB.
 
 **Shared-device, same-room play:** multiple teams pass one device to take turns. No per-user login required during gameplay.
 
@@ -13,7 +13,7 @@ A faith-based digital party game — a web adaptation of the KultureGames *Get C
 | Frontend    | React 18 + Vite, TypeScript, Tailwind CSS v3, shadcn/ui, TanStack Query, React Router v6 |
 | Backend     | Node.js 20 + Express 4 |
 | Database    | MongoDB + Mongoose |
-| AI          | Anthropic Claude API (proxied via backend only) |
+| AI          | Google Gemini API (proxied via backend only) |
 
 ---
 
@@ -23,7 +23,7 @@ A faith-based digital party game — a web adaptation of the KultureGames *Get C
 
 - **Node.js v20+**
 - **MongoDB** (local or [Atlas](https://cloud.mongodb.com))
-- **Anthropic API key** from [console.anthropic.com](https://console.anthropic.com)
+- **Google Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey)
 
 ### 1. Install dependencies
 
@@ -42,9 +42,9 @@ Create `backend/.env`:
 ```env
 PORT=3001
 MONGO_URI=mongodb://localhost:27017/get-churched
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxx
-CLAUDE_MODEL=claude-sonnet-4-5-20251022
-CLAUDE_TOP_UP_RATE=0.3
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_TOP_UP_RATE=0.3
 ALLOWED_ORIGIN=http://localhost:5173
 ```
 
@@ -81,7 +81,7 @@ get-churched/
 ├── backend/           # Node.js + Express
 │   ├── src/
 │   │   ├── routes/    # cards, sessions, leaderboard
-│   │   ├── services/  # claudeService (Anthropic)
+│   │   ├── services/  # geminiService (Google Gemini)
 │   │   ├── models/    # Session, Leaderboard (Mongoose)
 │   │   └── middleware/
 │   └── server.js
@@ -106,7 +106,7 @@ get-churched/
 | One Word 1️⃣       | One word only to describe the concept |
 | Draw 🎨           | Pictionary-style on canvas |
 
-Cards come from a built-in deck (~70%) and from Claude API (~30%). If the API fails, the backend falls back to the built-in deck.
+Cards come from a built-in deck (~70%) and from the Gemini API (~30%). If the API fails, the backend falls back to the built-in deck.
 
 ---
 
@@ -114,7 +114,7 @@ Cards come from a built-in deck (~70%) and from Claude API (~30%). If the API fa
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST   | `/api/cards/generate` | Body: `{ mode }` — returns card (Claude or fallback) |
+| POST   | `/api/cards/generate` | Body: `{ mode }` — returns card (Gemini or fallback) |
 | POST   | `/api/sessions`       | Save completed game |
 | GET    | `/api/sessions/:id`   | Get session by ID |
 | GET    | `/api/leaderboard`    | Top entries (`?limit=10&sort=score`) |

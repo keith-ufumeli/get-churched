@@ -1,7 +1,7 @@
 # ✟ GET CHURCHED
 ## Web App — Product Requirements Document
 
-> **Stack:** React + Vite · TypeScript · Node.js/Express · MongoDB · Tailwind CSS v3 · shadcn/ui · Anthropic Claude API
+> **Stack:** React + Vite · TypeScript · Node.js/Express · MongoDB · Tailwind CSS v3 · shadcn/ui · Google Gemini API
 
 | Field | Detail |
 |---|---|
@@ -13,7 +13,7 @@
 
 ## 1. Project Overview
 
-Get Churched is a faith-based digital party game — a web application adaptation of the physical KultureGames *Get ChurchED* card game — extended with **10 interactive game modes**, AI-powered card generation via the Anthropic Claude API, team management, score tracking, and game session history stored in MongoDB.
+Get Churched is a faith-based digital party game — a web application adaptation of the physical KultureGames *Get ChurchED* card game — extended with **10 interactive game modes**, AI-powered card generation via the Google Gemini API, team management, score tracking, and game session history stored in MongoDB.
 
 The application runs entirely in a **shared-device, same-room setting** where multiple teams pass a single device around to take turns. No per-user authentication is required during gameplay, but optional host accounts allow saving game history and accessing a leaderboard.
 
@@ -24,10 +24,10 @@ The application runs entirely in a **shared-device, same-room setting** where mu
 ### 2.1 Goals
 
 - Deliver all 10 game modes in a polished, production-ready React + Vite SPA written in TypeScript.
-- Use the Anthropic Claude API (`claude-sonnet-4-5` or later) to generate fresh card prompts on demand, supplementing a built-in offline deck.
+- Use the Google Gemini API (`gemini-1.5-flash` or `gemini-1.5-pro`) to generate fresh card prompts on demand, supplementing a built-in offline deck.
 - Persist game session results and team scores in MongoDB.
 - Support a flexible number of teams (2–unlimited) on one shared browser device.
-- Keep the API key secure by routing all Claude API calls through the Node.js/Express backend — never exposed to the browser.
+- Keep the API key secure by routing all Gemini API calls through the Node.js/Express backend — never exposed to the browser.
 
 ### 2.2 Non-Goals (v1.0)
 
@@ -50,8 +50,8 @@ The application runs entirely in a **shared-device, same-room setting** where mu
 | Server State | TanStack Query (React Query) | API data fetching, caching, and synchronisation |
 | Client State | React Context + `useReducer` | In-game session state (teams, scores, round progress) |
 | Routing | React Router v6 | SPA navigation between screens |
-| Backend | Node.js 20 + Express 4 | REST API, Claude proxy, DB layer |
-| AI Engine | Anthropic Claude API | Dynamic card + trivia generation |
+| Backend | Node.js 20 + Express 4 | REST API, Gemini proxy, DB layer |
+| AI Engine | Google Gemini API | Dynamic card + trivia generation |
 | Database | MongoDB + Mongoose | Game sessions, scores, leaderboard |
 | Canvas | HTML5 Canvas (React ref) | Draw mode freehand drawing board |
 | HTTP Client | Axios | Frontend → backend API calls (used inside TanStack Query) |
@@ -126,13 +126,13 @@ get-churched/
 │   │   │   ├── Session.js
 │   │   │   └── Leaderboard.js
 │   │   ├── services/
-│   │   │   └── claudeService.js     # All Claude API calls
+│   │   │   └── geminiService.js     # All Gemini API calls
 │   │   ├── middleware/
 │   │   │   ├── errorHandler.js
 │   │   │   └── rateLimiter.js
 │   │   └── app.js                   # Express app setup
 │   ├── server.js                    # Entry point
-│   ├── .env                         # ANTHROPIC_API_KEY, MONGO_URI
+│   ├── .env                         # GEMINI_API_KEY, MONGO_URI
 │   └── package.json
 │
 └── README.md
@@ -142,7 +142,7 @@ get-churched/
 
 ## 5. Game Modes (10 Total)
 
-Each round, the active team draws a card from a randomly selected mode. Cards are sourced first from the built-in JSON deck; if the AI top-up flag is active (~30% of draws), the backend requests a fresh card from the Claude API instead.
+Each round, the active team draws a card from a randomly selected mode. Cards are sourced first from the built-in JSON deck; if the AI top-up flag is active (~30% of draws), the backend requests a fresh card from the Gemini API instead.
 
 | # | Mode | Card Colour | How to Play | Scoring |
 |---|---|---|---|---|
@@ -159,9 +159,9 @@ Each round, the active team draws a card from a randomly selected mode. Cards ar
 
 ---
 
-## 6. Claude API Integration (Card Generation)
+## 6. Gemini API Integration (Card Generation)
 
-All Claude API requests are made **exclusively from the Express backend**. The browser never has access to the API key. The frontend calls `POST /api/cards/generate` with a `mode` parameter; the backend constructs the appropriate prompt, calls the Anthropic API, parses the response, and returns a structured card object.
+All Gemini API requests are made **exclusively from the Express backend**. The browser never has access to the API key. The frontend calls `POST /api/cards/generate` with a `mode` parameter; the backend constructs the appropriate prompt, calls the Google Gemini API, parses the response, and returns a structured card object.
 
 ### 6.1 Secure Architecture
 
@@ -171,12 +171,12 @@ Browser (React)
    │  (via TanStack Query useMutation → Axios)
    ▼
 Express Backend  ─────────────────────────────────────────────
-   │  claudeService.generateCard(mode)
-   │  headers: { x-api-key: process.env.ANTHROPIC_API_KEY }
+   │  geminiService.generateCard(mode)
+   │  apiKey: process.env.GEMINI_API_KEY
    ▼
-Anthropic API  (api.anthropic.com/v1/messages)
-   │  model: claude-sonnet-4-5-20251022
-   │  max_tokens: 300
+Google Gemini API  (generativelanguage.googleapis.com)
+   │  model: gemini-1.5-flash (or GEMINI_MODEL)
+   │  maxOutputTokens: 300
    ▼
 Backend parses + validates response JSON
    ▼
@@ -185,7 +185,7 @@ Returns clean card object to React frontend
 
 ### 6.2 Prompt Design Per Mode
 
-The `claudeService.js` file (backend) maps each mode to a carefully crafted system+user prompt pair. On the frontend, typed API helpers in `src/lib/api.ts` define the response shapes and are consumed via TanStack Query hooks. All prompts instruct the model to reply **only with valid JSON** in a defined schema, with no preamble or markdown fences.
+The `geminiService.js` file (backend) maps each mode to a carefully crafted system+user prompt pair. On the frontend, typed API helpers in `src/lib/api.ts` define the response shapes and are consumed via TanStack Query hooks. All prompts instruct the model to reply **only with valid JSON** in a defined schema, with no preamble or markdown fences.
 
 | Mode | User Prompt (summary) | Expected JSON Schema |
 |---|---|---|
@@ -198,13 +198,13 @@ The `claudeService.js` file (backend) maps each mode to a carefully crafted syst
 
 The system uses a **70/30 split**:
 - **70%** of draws use the built-in JSON deck (works fully offline).
-- **30%** request a freshly generated card from Claude.
+- **30%** request a freshly generated card from Gemini.
 
-If the Claude API call fails for any reason (network error, timeout, rate limit), the backend silently falls back to serving a built-in card. The client never sees an error — it simply receives a card.
+If the Gemini API call fails for any reason (network error, timeout, rate limit), the backend silently falls back to serving a built-in card. The client never sees an error — it simply receives a card.
 
-> ℹ **Tip:** Set `CLAUDE_TOP_UP_RATE=0.3` in `.env` to control the AI draw probability without redeploying code.
+> ℹ **Tip:** Set `GEMINI_TOP_UP_RATE=0.3` in `.env` to control the AI draw probability without redeploying code.
 
-> ⚠ **Warning:** Never call the Anthropic API directly from React/Axios. Always proxy through Express to keep your API key secret.
+> ⚠ **Warning:** Never call the Gemini API directly from React/Axios. Always proxy through Express to keep your API key secret.
 
 ---
 
@@ -282,7 +282,7 @@ const LeaderboardSchema = new mongoose.Schema({
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/cards/generate` | Body: `{ mode }`. Calls Claude API (or falls back to built-in deck). Returns a structured card object. |
+| `POST` | `/api/cards/generate` | Body: `{ mode }`. Calls Gemini API (or falls back to built-in deck). Returns a structured card object. |
 | `POST` | `/api/sessions` | Body: full session object. Saves completed game to MongoDB. Returns `{ sessionId }`. |
 | `GET` | `/api/sessions/:id` | Returns a single saved session by `sessionId`. |
 | `GET` | `/api/leaderboard` | Query params: `?limit=10&sort=score`. Returns top entries. |
@@ -301,7 +301,7 @@ Ensure the following are installed before beginning:
 - **npm v9+** (bundled with Node.js)
 - **MongoDB** — local install (https://www.mongodb.com/try/download/community) or free Atlas cluster (https://cloud.mongodb.com)
 - **Git** — for version control
-- **Anthropic API key** — obtain from https://console.anthropic.com
+- **Google Gemini API key** — obtain from https://aistudio.google.com/apikey
 
 ### Step 2 — Clone & Scaffold Project
 
@@ -442,8 +442,8 @@ npm install express cors dotenv
 # Database
 npm install mongoose
 
-# Anthropic SDK  ← key dependency
-npm install @anthropic-ai/sdk
+# Google Generative AI SDK  ← key dependency
+npm install @google/generative-ai
 
 # Utilities
 npm install uuid express-rate-limit helmet morgan
@@ -458,9 +458,9 @@ npm install -D nodemon
 # backend/.env
 PORT=3001
 MONGO_URI=mongodb://localhost:27017/get-churched
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxx
-CLAUDE_MODEL=claude-sonnet-4-5-20251022
-CLAUDE_TOP_UP_RATE=0.3
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-1.5-flash
+GEMINI_TOP_UP_RATE=0.3
 ALLOWED_ORIGIN=http://localhost:5173
 ```
 
@@ -601,13 +601,13 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => { console.error(err); process.exit(1) })
 ```
 
-### Step 10 — Claude Service Skeleton
+### Step 10 — Gemini Service Skeleton
 
 ```js
-// backend/src/services/claudeService.js
-import Anthropic from '@anthropic-ai/sdk'
+// backend/src/services/geminiService.js
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 const PROMPTS = {
   trivia: `Generate one Bible trivia question as JSON:
@@ -628,14 +628,13 @@ const PROMPTS = {
 
 export async function generateCard(mode) {
   const prompt = PROMPTS[mode] || PROMPTS.explain
-
-  const msg = await client.messages.create({
-    model: process.env.CLAUDE_MODEL,
-    max_tokens: 300,
-    messages: [{ role: 'user', content: prompt }],
+  const model = genAI.getGenerativeModel({
+    model: process.env.GEMINI_MODEL,
+    generationConfig: { maxOutputTokens: 300 },
   })
 
-  const text = msg.content[0]?.text?.trim() || ''
+  const result = await model.generateContent(prompt)
+  const text = result.response.text()?.trim() || ''
   const jsonModes = ['trivia', 'fillinblank', 'taboo']
 
   if (jsonModes.includes(mode)) {
@@ -716,8 +715,8 @@ The app should evoke a warm, faith-inspired aesthetic — referencing the textur
 
 ## 13. Key Architecture Decisions
 
-**Why proxy Claude API calls through Express?**
-The Anthropic API key must never be included in frontend bundles. Any user who inspects network requests or the JavaScript bundle could extract it and run up your bill. The Express backend acts as the secure proxy — it holds the key in `.env`, makes the API call server-side, and returns only the processed card data.
+**Why proxy Gemini API calls through Express?**
+The Gemini API key must never be included in frontend bundles. Any user who inspects network requests or the JavaScript bundle could extract it and run up your bill. The Express backend acts as the secure proxy — it holds the key in `.env`, makes the API call server-side, and returns only the processed card data.
 
 **Why React Context + `useReducer` over a dedicated state library?**
 The in-game state (teams, scores, round history) is a single, well-scoped object that flows top-down and changes through clear, enumerated actions. `useReducer` provides predictable state transitions without introducing a third-party dependency. Redux or Zustand would be appropriate additions if state complexity grows significantly in v2.
@@ -738,7 +737,7 @@ TypeScript catches mismatched card schemas, missing props, and incorrect API res
 Game session documents are naturally hierarchical (session → rounds → card data). MongoDB stores these as nested documents without joins, which simplifies both the schema and the query logic. The mixed card type (string or object, depending on mode) maps cleanly to a flexible BSON document.
 
 **Why 70/30 built-in vs. AI card split?**
-The built-in deck guarantees the game always works offline or when the API is unavailable. The 30% AI draw rate is enough to keep sessions feeling fresh and surprising without generating excessive API costs. This ratio is adjustable via the `CLAUDE_TOP_UP_RATE` environment variable.
+The built-in deck guarantees the game always works offline or when the API is unavailable. The 30% AI draw rate is enough to keep sessions feeling fresh and surprising without generating excessive API costs. This ratio is adjustable via the `GEMINI_TOP_UP_RATE` environment variable.
 
 ---
 
@@ -746,7 +745,7 @@ The built-in deck guarantees the game always works offline or when the API is un
 
 - Real-time multiplayer on separate devices using Socket.IO.
 - Host login with saved custom card decks.
-- Difficulty levels (Easy / Medium / Hard) with separate built-in pools and Claude prompts.
+- Difficulty levels (Easy / Medium / Hard) with separate built-in pools and Gemini prompts.
 - Audio support — text-to-speech hint reading for accessibility.
 - Shareable session recap link (read-only scoreboard via `sessionId`).
 - PWA support — install as home-screen app, full offline play.
