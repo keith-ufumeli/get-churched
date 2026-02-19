@@ -41,11 +41,13 @@ export function ScoreboardPage() {
 
   const saveMutation = useMutation({
     mutationFn: async (data: { displayName: string; teamName?: string }) => {
+      const hasTie = state.teams.length >= 2 && sortedTeams[0] && sortedTeams[1] && (sortedTeams[0].score ?? 0) === (sortedTeams[1].score ?? 0)
       await saveSession({
         sessionId: state.sessionId!,
         teams: state.teams,
         rounds: state.rounds,
         playedAt: new Date().toISOString(),
+        winner: hasTie ? undefined : winner?.name,
         selectedMode: state.selectedMode ?? undefined,
         roundsPerMode: state.roundsPerMode || undefined,
         difficulty: state.difficulty,

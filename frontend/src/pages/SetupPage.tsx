@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useGame } from '@/hooks/useGame'
 import { TeamSetup } from '@/components/game/TeamSetup'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { Team, Difficulty } from '@/types/game'
@@ -33,7 +32,6 @@ export function SetupPage() {
   const { dispatch } = useGame()
   const [step, setStep] = useState<OnboardingStep>('welcome')
   const [teams, setTeams] = useState<Team[]>([])
-  const [roundsPerTeam, setRoundsPerTeam] = useState(5)
   const [difficulty, setDifficulty] = useState<Difficulty>('medium')
   const [hymnCountry, setHymnCountry] = useState('')
 
@@ -56,7 +54,6 @@ export function SetupPage() {
       payload: {
         sessionId,
         teams: teamsWithScores,
-        roundsPerTeam,
         currentTeamIndex: 0,
         rounds: [],
         difficulty,
@@ -212,23 +209,10 @@ export function SetupPage() {
                     Back
                   </Button>
                 </div>
+                <p className="text-warmBrown text-sm">
+                  Number of rounds is chosen each time you start a set — after you pick a game mode.
+                </p>
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-mahogany mb-2">
-                      Rounds per Team
-                    </label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="20"
-                      value={roundsPerTeam}
-                      onChange={(e) => setRoundsPerTeam(parseInt(e.target.value) || 5)}
-                      className="w-full"
-                    />
-                    <p className="text-sm text-warmBrown mt-2">
-                      Each team will play {roundsPerTeam} rounds. Total rounds: {teams.length * roundsPerTeam}
-                    </p>
-                  </div>
                   <div>
                     <label className="block text-sm font-medium text-mahogany mb-2">
                       Difficulty
