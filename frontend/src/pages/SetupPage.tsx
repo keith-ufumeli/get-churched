@@ -7,8 +7,24 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { Team } from '@/types/game'
+import type { Team, Difficulty } from '@/types/game'
 import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react'
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
+  { value: 'easy', label: 'Easy' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'hard', label: 'Hard' },
+  { value: 'mixed', label: 'Mixed' },
+]
+
+const HYMN_COUNTRIES = [
+  { value: '', label: 'Any' },
+  { value: 'US', label: 'United States' },
+  { value: 'UK', label: 'United Kingdom' },
+  { value: 'Nigeria', label: 'Nigeria' },
+  { value: 'South Africa', label: 'South Africa' },
+  { value: 'Zimbabwe', label: 'Zimbabwe' },
+]
 
 type OnboardingStep = 'welcome' | 'teams' | 'rounds'
 
@@ -18,6 +34,8 @@ export function SetupPage() {
   const [step, setStep] = useState<OnboardingStep>('welcome')
   const [teams, setTeams] = useState<Team[]>([])
   const [roundsPerTeam, setRoundsPerTeam] = useState(5)
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium')
+  const [hymnCountry, setHymnCountry] = useState('')
 
   const handleAddTeam = (team: Team) => {
     setTeams([...teams, team])
@@ -41,6 +59,8 @@ export function SetupPage() {
         roundsPerTeam,
         currentTeamIndex: 0,
         rounds: [],
+        difficulty,
+        hymnCountry,
       },
     })
 
@@ -207,6 +227,41 @@ export function SetupPage() {
                     />
                     <p className="text-sm text-warmBrown mt-2">
                       Each team will play {roundsPerTeam} rounds. Total rounds: {teams.length * roundsPerTeam}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-mahogany mb-2">
+                      Difficulty
+                    </label>
+                    <select
+                      value={difficulty}
+                      onChange={(e) => setDifficulty(e.target.value as Difficulty)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {DIFFICULTY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-mahogany mb-2">
+                      Hymn / Gospel region (optional)
+                    </label>
+                    <select
+                      value={hymnCountry}
+                      onChange={(e) => setHymnCountry(e.target.value)}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {HYMN_COUNTRIES.map((opt) => (
+                        <option key={opt.value || 'any'} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-sm text-warmBrown mt-1">
+                      Affects Hum a Hymn and song suggestions
                     </p>
                   </div>
                 </div>

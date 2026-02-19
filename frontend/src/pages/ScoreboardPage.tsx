@@ -46,6 +46,9 @@ export function ScoreboardPage() {
         teams: state.teams,
         rounds: state.rounds,
         playedAt: new Date().toISOString(),
+        selectedMode: state.selectedMode ?? undefined,
+        roundsPerMode: state.roundsPerMode || undefined,
+        difficulty: state.difficulty,
       })
       return fetch('/api/leaderboard', {
         method: 'POST',
@@ -94,7 +97,7 @@ export function ScoreboardPage() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={cn('min-h-screen bg-parchment p-6 font-sans relative')}
+      className={cn('min-h-screen bg-parchment p-4 sm:p-6 font-sans relative')}
     >
       {isPostGame && showConfetti && (
         <Confetti
@@ -184,11 +187,11 @@ export function ScoreboardPage() {
               </AnimatePresence>
             </div>
 
-            <div className="flex gap-4 justify-center">
-              <Button onClick={() => setShowSaveDialog(true)} variant="outline" size="lg">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button onClick={() => setShowSaveDialog(true)} variant="outline" size="lg" className="min-h-[44px]">
                 Save to Leaderboard
               </Button>
-              <Button onClick={handleNewGame} size="lg">
+              <Button onClick={handleNewGame} size="lg" className="min-h-[44px]">
                 <Play className="h-4 w-4 mr-2" />
                 New Game
               </Button>

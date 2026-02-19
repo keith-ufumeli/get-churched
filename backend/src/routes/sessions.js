@@ -16,6 +16,9 @@ router.post('/', async (req, res, next) => {
       rounds: body.rounds || [],
       winner: body.winner,
       totalRounds: body.totalRounds,
+      selectedMode: body.selectedMode ?? undefined,
+      roundsPerMode: body.roundsPerMode ?? undefined,
+      difficulty: body.difficulty ?? undefined,
     });
 
     await session.save();

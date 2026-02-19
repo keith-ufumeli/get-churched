@@ -3,8 +3,22 @@ import type { CardMode, CardResponse, Session } from '@/types/game'
 
 const api = axios.create({ baseURL: '/api' })
 
-export async function generateCard(mode: CardMode): Promise<CardResponse> {
-  const { data } = await api.post<CardResponse>('/cards/generate', { mode })
+export interface GenerateCardOptions {
+  mode: CardMode
+  difficulty?: string
+  country?: string
+  usedPrompts?: string[]
+  sessionId?: string | null
+}
+
+export async function generateCard(options: GenerateCardOptions): Promise<CardResponse> {
+  const { data } = await api.post<CardResponse>('/cards/generate', {
+    mode: options.mode,
+    difficulty: options.difficulty ?? undefined,
+    country: options.country ?? undefined,
+    usedPrompts: options.usedPrompts ?? undefined,
+    sessionId: options.sessionId ?? undefined,
+  })
   return data
 }
 

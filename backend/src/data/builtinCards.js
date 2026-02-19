@@ -4,7 +4,7 @@
  */
 
 const builtinCards = {
-  sing: ['Amazing Grace', 'How Great Thou Art', 'Holy Spirit'],
+  sing: ['Grace', 'Love', 'Peace', 'Holy', 'Spirit', 'Praise', 'Glory', 'Faith'],
   act: ['Noah and the Ark', 'David and Goliath', 'The Good Samaritan'],
   explain: ['Faith', 'Redemption', 'Covenant'],
   trivia: [
@@ -29,16 +29,35 @@ const builtinCards = {
 };
 
 /**
- * Get a random card for the given mode.
+ * Normalize a card to a stable string key for deduplication (O(1) used-set lookup).
+ * @param {string|object} card - Card content
+ * @returns {string} Normalized key
+ */
+function normalizeCardKey(card) {
+  if (card == null) return '';
+  if (typeof card === 'string') return card.trim().toLowerCase();
+  return JSON.stringify(card).trim().toLowerCase();
+}
+
+/**
+ * Get a random card for the given mode, optionally excluding already-used keys.
  * @param {string} mode - Card mode (sing, act, trivia, etc.)
+ * @param {{ usedSet?: Set<string> }} opts - Optional: Set of normalized keys to exclude
  * @returns {string|object} Card content (string for simple modes, object for trivia/fillinblank/taboo)
  */
-function getRandomBuiltinCard(mode) {
-  const cards = builtinCards[mode];
+function getRandomBuiltinCard(mode, opts = {}) {
+  const { usedSet } = opts;
+  let cards = builtinCards[mode];
   if (!cards || cards.length === 0) {
     return builtinCards.explain[0];
+  }
+  if (usedSet && usedSet.size > 0) {
+    cards = cards.filter((c) => !usedSet.has(normalizeCardKey(c)));
+    if (cards.length === 0) {
+      cards = builtinCards[mode];
+    }
   }
   return cards[Math.floor(Math.random() * cards.length)];
 }
 
-module.exports = { builtinCards, getRandomBuiltinCard };
+module.exports = { builtinCards, getRandomBuiltinCard, normalizeCardKey };

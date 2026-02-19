@@ -36,7 +36,7 @@ export function ScoreBoard({ teams, currentTeamIndex, className }: ScoreBoardPro
               >
                 <Card
                   className={cn(
-                    'p-4 transition-all',
+                    'p-4 transition-all min-h-[44px] flex items-center',
                     isCurrent && 'ring-2 ring-gold shadow-lg',
                     isLeader && 'bg-gradient-to-r from-gold/10 to-transparent'
                   )}

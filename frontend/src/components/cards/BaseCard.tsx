@@ -48,7 +48,7 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
       transition={{ duration: 0.3 }}
       className={cn('w-full', className)}
     >
-      <Card className="p-6 space-y-6">
+      <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <motion.div
             initial={{ rotate: -10, scale: 0.8 }}
@@ -72,18 +72,18 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
           )}
         </div>
 
-        <div className="min-h-[200px] flex items-center justify-center">
+        <div className="min-h-[180px] sm:min-h-[200px] flex items-center justify-center py-4">
           {children}
         </div>
 
         {showScoreButtons && (
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               onClick={() => {
                 timer.pause()
                 onScore(2)
               }}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white min-h-[44px] min-w-[44px] px-6 py-3 text-base"
               size="lg"
             >
               Correct (+2pts)
@@ -94,6 +94,7 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
                 onScore(0)
               }}
               variant="destructive"
+              className="min-h-[44px] min-w-[44px] px-6 py-3 text-base"
               size="lg"
             >
               Incorrect (0pts)

@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useGame } from '@/hooks/useGame'
 import { useCard } from '@/hooks/useCard'
 import { ScoreBoard } from '@/components/game/ScoreBoard'
-import { ModeSelectionScreen } from '@/components/game/ModeSelectionScreen'
+import { RoundSetConfig } from '@/components/game/RoundSetConfig'
+import { ModeRules } from '@/components/game/ModeRules'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { normalizeCardKey } from '@/lib/cardUtils'
 import type { CardMode, CardResponse } from '@/types/game'
 import {
   SingCard,
@@ -51,12 +53,42 @@ function CardRenderer({ card, mode, onScore }: { card: CardResponse; mode: CardM
   }
 }
 
+type RoundPhase = 'selecting_set' | 'rules' | 'playing'
+
+function getInitialPhase(
+  selectedMode: CardMode | null,
+  roundsPerMode: number,
+  roundsPlayedInSet: number
+): RoundPhase {
+  if (!selectedMode || roundsPerMode <= 0 || roundsPlayedInSet >= roundsPerMode) {
+    return 'selecting_set'
+  }
+  if (roundsPlayedInSet === 0) return 'rules'
+  return 'playing'
+}
+
 export function RoundPage() {
   const navigate = useNavigate()
   const { state, dispatch } = useGame()
   const { mutate: generateCard, isPending, card, error } = useCard()
-  const [mode, setMode] = useState<CardMode | null>(null)
-  const [roundPhase, setRoundPhase] = useState<'selecting' | 'playing'>('selecting')
+  const [roundPhase, setRoundPhase] = useState<RoundPhase>(() =>
+    getInitialPhase(state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet)
+  )
+
+  const totalRounds = state.teams.length * state.roundsPerTeam
+  const remainingRounds = totalRounds - state.rounds.length
+  const mode = state.selectedMode
+
+  const cardOptions = useMemo(
+    () => ({
+      mode: mode!,
+      difficulty: state.difficulty,
+      country: state.hymnCountry || undefined,
+      usedPrompts: state.usedCards,
+      sessionId: state.sessionId,
+    }),
+    [mode, state.difficulty, state.hymnCountry, state.usedCards, state.sessionId]
+  )
 
   useEffect(() => {
     if (state.status !== 'playing') {
@@ -65,17 +97,29 @@ export function RoundPage() {
   }, [state.status, navigate])
 
   useEffect(() => {
-    if (error) {
-      toast.error('Failed to load card. Using fallback card.')
-      setTimeout(() => {
-        generateCard(mode!)
-      }, 1000)
-    }
-  }, [error, generateCard, mode])
+    const next = getInitialPhase(state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet)
+    setRoundPhase((p) => (p === 'selecting_set' ? next : p))
+  }, [state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet])
 
-  const handleModeSelect = (selectedMode: CardMode) => {
-    setMode(selectedMode)
-    generateCard(selectedMode)
+  useEffect(() => {
+    if (error && mode) {
+      toast.error('Failed to load card. Using fallback card.')
+      setTimeout(() => generateCard({ ...cardOptions, mode }), 1000)
+    }
+  }, [error]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (roundPhase === 'playing' && state.selectedMode && !card && !isPending) {
+      generateCard({ ...cardOptions, mode: state.selectedMode })
+    }
+  }, [roundPhase, state.selectedMode, card, isPending]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleRoundSetComplete = (selectedMode: CardMode, roundsPerMode: number) => {
+    dispatch({ type: 'START_ROUND_SET', payload: { selectedMode, roundsPerMode } })
+    setRoundPhase('rules')
+  }
+
+  const handleRulesDismiss = () => {
     setRoundPhase('playing')
   }
 
@@ -90,9 +134,10 @@ export function RoundPage() {
       payload: {
         teamName: currentTeam.name,
         mode,
-        card: card,
+        card,
         pointsEarned: points,
         timestamp: new Date().toISOString(),
+        usedCardKey: normalizeCardKey(card),
       },
     })
 
@@ -111,7 +156,7 @@ export function RoundPage() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={cn('min-h-screen bg-parchment p-6 font-sans')}
+      className={cn('min-h-screen bg-parchment p-4 sm:p-6 font-sans')}
     >
       <div className="max-w-6xl mx-auto">
         <motion.div
@@ -127,14 +172,19 @@ export function RoundPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
-            {roundPhase === 'selecting' ? (
-              <ModeSelectionScreen
+            {roundPhase === 'selecting_set' && (
+              <RoundSetConfig
                 currentTeamName={currentTeam?.name ?? ''}
-                onSelectMode={handleModeSelect}
+                remainingRounds={remainingRounds}
+                onComplete={handleRoundSetComplete}
               />
-            ) : (
+            )}
+            {roundPhase === 'rules' && state.selectedMode && (
+              <ModeRules mode={state.selectedMode} onDismiss={handleRulesDismiss} />
+            )}
+            {roundPhase === 'playing' && (
               <>
                 {isPending || !card || !mode ? (
                   <Card className="p-12 flex items-center justify-center min-h-[400px]">

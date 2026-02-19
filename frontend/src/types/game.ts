@@ -10,6 +10,8 @@ export type CardMode =
   | 'oneword'
   | 'draw'
 
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed'
+
 export interface Team {
   name: string
   color?: string
@@ -54,6 +56,9 @@ export interface Session {
   rounds: Round[]
   winner?: string
   totalRounds?: number
+  selectedMode?: string | null
+  roundsPerMode?: number | null
+  difficulty?: string | null
 }
 
 export type GameStatus = 'idle' | 'setup' | 'playing' | 'finished'
@@ -65,11 +70,20 @@ export interface GameState {
   currentTeamIndex: number
   roundsPerTeam: number
   status: GameStatus
+  difficulty: Difficulty
+  hymnCountry: string
+  selectedMode: CardMode | null
+  roundsPerMode: number
+  roundsPlayedInSet: number
+  usedCards: string[]
 }
+
+export type ScoreRoundPayload = Round & { usedCardKey?: string }
 
 export type GameAction =
   | { type: 'START_GAME'; payload: Partial<GameState> }
-  | { type: 'SCORE_ROUND'; payload: Round }
+  | { type: 'START_ROUND_SET'; payload: { selectedMode: CardMode; roundsPerMode: number } }
+  | { type: 'SCORE_ROUND'; payload: ScoreRoundPayload }
   | { type: 'END_GAME' }
   | { type: 'RESET' }
 

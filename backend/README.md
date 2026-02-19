@@ -41,6 +41,9 @@ ALLOWED_ORIGIN=http://localhost:5173
 | `GEMINI_API_KEY` | API key from [Google AI Studio](https://aistudio.google.com/apikey) |
 | `GEMINI_MODEL` | Model ID (e.g. `gemini-2.5-flash` or `gemini-2.5-pro`) |
 | `GEMINI_TOP_UP_RATE` | Fraction of card draws that use Gemini (e.g. `0.3` = 30%) |
+| `GEMINI_SOFT_LIMIT_CALLS` | Optional. Per-session max Gemini calls; over this use built-in only (default 1000). |
+| `GEMINI_SOFT_LIMIT_TOKENS` | Optional. Per-session max tokens; over this use built-in only (default 500000). |
+| `ADMIN_SECRET` | Secret token for admin API; set `X-Admin-Token` header to this value. |
 | `ALLOWED_ORIGIN` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
 
 ### 3. Run
@@ -70,12 +73,14 @@ Server runs at **http://localhost:3001** (or the port in `PORT`).
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/cards/generate` | Body: `{ mode }`. Returns a card (Gemini or built-in fallback). |
+| `POST` | `/api/cards/generate` | Body: `{ mode, difficulty?, country?, usedPrompts?, sessionId? }`. Returns a card. |
+| `POST` | `/api/mode-words` | Body: `{ mode, word, difficulty?, country? }`. Add custom word (409 if duplicate). |
 | `POST` | `/api/sessions` | Body: full session object. Saves game to MongoDB. |
 | `GET` | `/api/sessions/:id` | Get a saved session by `sessionId`. |
 | `GET` | `/api/leaderboard` | Query: `?limit=10&sort=score`. Top leaderboard entries. |
 | `POST` | `/api/leaderboard` | Body: `{ displayName, teamName, score, sessionId }`. Add entry. |
 | `GET` | `/api/health` | Health check; returns 200 OK. |
+| `GET/POST/DELETE` | `/api/admin/*` | Admin-only (header `X-Admin-Token: <ADMIN_SECRET>`): words, usage, config, sessions. |
 
 ---
 

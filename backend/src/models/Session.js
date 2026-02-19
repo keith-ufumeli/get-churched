@@ -17,6 +17,9 @@ const SessionSchema = new mongoose.Schema({
   }],
   winner: String,
   totalRounds: Number,
+  selectedMode: { type: String, default: null },
+  roundsPerMode: { type: Number, default: null },
+  difficulty: { type: String, default: null },
 });
 
 module.exports = mongoose.model('Session', SessionSchema);

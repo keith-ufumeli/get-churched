@@ -15,19 +15,19 @@ export function Timer({ duration, timeLeft, color = 'bg-mahogany', className }: 
 
   return (
     <div className={cn('w-full space-y-2', className)}>
-      <div className="flex items-center justify-between text-sm">
+      <div className="flex items-center justify-between text-sm sm:text-base">
         <span className="font-medium text-warmBrown">Time Remaining</span>
         <motion.span
           key={timeLeft}
           initial={{ scale: 1.2, color: '#DC2626' }}
           animate={{ scale: 1, color: timeLeft <= 10 ? '#DC2626' : '#4A1C0E' }}
-          className="font-bold text-lg tabular-nums"
+          className="font-bold text-xl sm:text-2xl tabular-nums min-w-[3rem] text-right"
         >
           {timeLeft}s
         </motion.span>
       </div>
-      <div className="relative">
-        <Progress value={progress} className="h-3" />
+      <div className="relative min-h-[12px] flex items-center">
+        <Progress value={progress} className="h-3 w-full" />
         <motion.div
           className={cn('absolute inset-0 rounded-full', color)}
           style={{ opacity: 0.2 }}

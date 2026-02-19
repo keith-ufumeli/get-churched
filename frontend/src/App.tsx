@@ -7,6 +7,7 @@ import { SetupPage } from '@/pages/SetupPage'
 import { RoundPage } from '@/pages/RoundPage'
 import { ResultPage } from '@/pages/ResultPage'
 import { ScoreboardPage } from '@/pages/ScoreboardPage'
+import { AdminPortalPage, ADMIN_PATH } from '@/pages/AdminPortalPage'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -19,6 +20,7 @@ function AnimatedRoutes() {
         <Route path="/round" element={<RoundPage />} />
         <Route path="/result" element={<ResultPage />} />
         <Route path="/scoreboard" element={<ScoreboardPage />} />
+        <Route path={ADMIN_PATH.startsWith('/') ? ADMIN_PATH : `/${ADMIN_PATH}`} element={<AdminPortalPage />} />
       </Routes>
     </AnimatePresence>
   )

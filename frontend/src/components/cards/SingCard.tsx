@@ -12,9 +12,10 @@ export function SingCard({ card, mode, onScore }: SingCardProps) {
 
   return (
     <BaseCard card={card} mode={mode} onScore={onScore}>
-      <p className="text-2xl font-serif text-center text-mahogany px-4">
-        {text}
-      </p>
+      <div className="space-y-2 text-center px-4">
+        <p className="text-2xl font-serif text-mahogany">{text}</p>
+        <p className="text-sm text-warmBrown">Your song must contain this word.</p>
+      </div>
     </BaseCard>
   )
 }

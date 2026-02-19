@@ -6,9 +6,12 @@ const swaggerUi = require('swagger-ui-express');
 
 const rateLimiter = require('./middleware/rateLimiter');
 const errorHandler = require('./middleware/errorHandler');
+const adminAuth = require('./middleware/adminAuth');
 const cardsRouter = require('./routes/cards');
+const modeWordsRouter = require('./routes/modeWords');
 const sessionsRouter = require('./routes/sessions');
 const leaderboardRouter = require('./routes/leaderboard');
+const adminRouter = require('./routes/admin');
 const openApiDocument = require('./openapi.json');
 
 const app = express();
@@ -27,8 +30,10 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api', rateLimiter);
 app.use('/api/cards', cardsRouter);
+app.use('/api/mode-words', modeWordsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/leaderboard', leaderboardRouter);
+app.use('/api/admin', adminAuth, adminRouter);
 
 app.use(errorHandler);
 

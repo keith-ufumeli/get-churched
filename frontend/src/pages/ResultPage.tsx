@@ -60,7 +60,7 @@ export function ResultPage() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={cn('min-h-screen bg-parchment p-6 font-sans relative')}
+      className={cn('min-h-screen bg-parchment p-4 sm:p-6 font-sans relative')}
     >
       {showConfetti && (
         <Confetti
@@ -82,7 +82,7 @@ export function ResultPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -165,7 +165,7 @@ export function ResultPage() {
           transition={{ delay: 0.5 }}
           className="flex justify-center"
         >
-          <Button onClick={handleNext} size="lg" className="min-w-[200px]">
+          <Button onClick={handleNext} size="lg" className="min-w-[200px] min-h-[44px]">
             {isGameComplete ? (
               <>
                 <Trophy className="h-4 w-4 mr-2" />

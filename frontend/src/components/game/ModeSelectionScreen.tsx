@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
-import { GAME_MODES, MODE_COLORS, MODE_LABELS, MODE_EMOJIS, MODE_DESCRIPTIONS } from '@/lib/gameModes'
+import { GAME_MODES, MODE_COLORS, MODE_LABELS, MODE_ICONS, MODE_DESCRIPTIONS } from '@/lib/gameModes'
 import type { CardMode } from '@/types/game'
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -31,7 +31,7 @@ export function ModeSelectionScreen({ currentTeamName, onSelectMode }: ModeSelec
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {GAME_MODES.map((mode, index) => (
             <motion.button
               key={mode}
@@ -41,7 +41,7 @@ export function ModeSelectionScreen({ currentTeamName, onSelectMode }: ModeSelec
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSelectMode(mode)}
-              className="text-left rounded-xl border-2 p-4 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              className="text-left rounded-xl border-2 p-4 min-h-[44px] transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 touch-manipulation"
               style={{
                 borderColor: hexToRgba(MODE_COLORS[mode], 0.6),
                 backgroundColor: hexToRgba(MODE_COLORS[mode], 0.08),
@@ -49,9 +49,10 @@ export function ModeSelectionScreen({ currentTeamName, onSelectMode }: ModeSelec
               aria-label={`Select ${MODE_LABELS[mode]} mode`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xl leading-none" role="img" aria-hidden="true">
-                  {MODE_EMOJIS[mode]}
-                </span>
+                {(() => {
+                  const Icon = MODE_ICONS[mode]
+                  return <Icon className="h-5 w-5 shrink-0 text-mahogany" aria-hidden />
+                })()}
                 <span className="font-bold text-mahogany text-sm leading-tight">
                   {MODE_LABELS[mode]}
                 </span>

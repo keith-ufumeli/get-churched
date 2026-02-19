@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
-import { generateCard } from '@/lib/api'
-import type { CardMode, CardResponse } from '@/types/game'
+import { generateCard, type GenerateCardOptions } from '@/lib/api'
+import type { CardResponse } from '@/types/game'
 
 interface UseCardReturn {
-  mutate: (mode: CardMode) => void
+  mutate: (options: GenerateCardOptions) => void
   isPending: boolean
   card: CardResponse | null
   error: Error | null
