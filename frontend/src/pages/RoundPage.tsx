@@ -55,15 +55,16 @@ function CardRenderer({ card, mode, onScore }: { card: CardResponse; mode: CardM
 
 type RoundPhase = 'selecting_set' | 'rules' | 'playing'
 
-function getInitialPhase(
+function derivePhase(
   selectedMode: CardMode | null,
   roundsPerMode: number,
-  roundsPlayedInSet: number
+  roundsPlayedInSet: number,
+  rulesDismissedForSet: boolean
 ): RoundPhase {
   if (!selectedMode || roundsPerMode <= 0 || roundsPlayedInSet >= roundsPerMode) {
     return 'selecting_set'
   }
-  if (roundsPlayedInSet === 0) return 'rules'
+  if (roundsPlayedInSet === 0 && !rulesDismissedForSet) return 'rules'
   return 'playing'
 }
 
@@ -71,13 +72,18 @@ export function RoundPage() {
   const navigate = useNavigate()
   const { state, dispatch } = useGame()
   const { mutate: generateCard, isPending, card, error } = useCard()
-  const [roundPhase, setRoundPhase] = useState<RoundPhase>(() =>
-    getInitialPhase(state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet)
-  )
+  const [rulesDismissedForSet, setRulesDismissedForSet] = useState(() => state.roundsPlayedInSet > 0)
 
   const totalRounds = state.teams.length * state.roundsPerTeam
   const remainingRounds = totalRounds - state.rounds.length
   const mode = state.selectedMode
+
+  const roundPhase = derivePhase(
+    state.selectedMode,
+    state.roundsPerMode,
+    state.roundsPlayedInSet,
+    rulesDismissedForSet
+  )
 
   const cardOptions = useMemo(
     () => ({
@@ -97,11 +103,6 @@ export function RoundPage() {
   }, [state.status, navigate])
 
   useEffect(() => {
-    const next = getInitialPhase(state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet)
-    setRoundPhase((p) => (p === 'selecting_set' ? next : p))
-  }, [state.selectedMode, state.roundsPerMode, state.roundsPlayedInSet])
-
-  useEffect(() => {
     if (error && mode) {
       toast.error('Failed to load card. Using fallback card.')
       setTimeout(() => generateCard({ ...cardOptions, mode }), 1000)
@@ -116,11 +117,11 @@ export function RoundPage() {
 
   const handleRoundSetComplete = (selectedMode: CardMode, roundsPerMode: number) => {
     dispatch({ type: 'START_ROUND_SET', payload: { selectedMode, roundsPerMode } })
-    setRoundPhase('rules')
+    setRulesDismissedForSet(false)
   }
 
   const handleRulesDismiss = () => {
-    setRoundPhase('playing')
+    setRulesDismissedForSet(true)
   }
 
   const handleScore = (points: number) => {
