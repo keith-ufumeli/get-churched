@@ -22,8 +22,9 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173';
-app.use(cors({ origin: allowedOrigin, credentials: true }));
+// Comma-separated origins for CORS (e.g. "http://localhost:5173,https://myapp.com")
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || 'http://localhost:5173').split(',').map((o) => o.trim()).filter(Boolean);
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true, credentials: true }));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
