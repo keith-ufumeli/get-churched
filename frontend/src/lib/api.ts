@@ -11,8 +11,13 @@ export interface GenerateCardOptions {
   sessionId?: string | null
 }
 
-export async function generateCard(options: GenerateCardOptions): Promise<CardResponse> {
-  const { data } = await api.post<CardResponse>('/cards/generate', {
+export interface GenerateCardResponse {
+  card: CardResponse
+  source: 'ai' | 'builtin' | 'custom'
+}
+
+export async function generateCard(options: GenerateCardOptions): Promise<GenerateCardResponse> {
+  const { data } = await api.post<GenerateCardResponse>('/cards/generate', {
     mode: options.mode,
     difficulty: options.difficulty ?? undefined,
     country: options.country ?? undefined,

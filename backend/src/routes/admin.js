@@ -51,9 +51,13 @@ router.delete('/words/:id', async (req, res, next) => {
   }
 });
 
-router.get('/usage', (req, res) => {
-  const usage = getUsageAll();
-  res.json(usage);
+router.get('/usage', async (req, res, next) => {
+  try {
+    const usage = await getUsageAll();
+    res.json(usage);
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.get('/config', (req, res) => {
@@ -76,6 +80,90 @@ router.get('/sessions', async (req, res, next) => {
     res.json(sessions);
   } catch (err) {
     next(err);
+  }
+});
+
+// Analytics endpoints
+router.get('/analytics/mode-popularity', async (req, res, next) => {
+  try {
+    const result = await Session.aggregate([
+      { $unwind: '$rounds' },
+      { $group: { _id: '$rounds.mode', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+    res.json(result.map((r) => ({ mode: r._id, count: r.count })));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/analytics/difficulty-distribution', async (req, res, next) => {
+  try {
+    const result = await Session.aggregate([
+      { $match: { difficulty: { $exists: true, $ne: null, $ne: '' } } },
+      { $group: { _id: '$difficulty', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+    res.json(result.map((r) => ({ difficulty: r._id, count: r.count })));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/analytics/session-stats', async (req, res, next) => {
+  try {
+    const result = await Session.aggregate([
+      { $project: { roundCount: { $size: '$rounds' } } },
+      {
+        $group: {
+          _id: null,
+          avgRoundsPerSession: { $avg: '$roundCount' },
+          totalSessions: { $sum: 1 },
+        },
+      },
+    ]);
+    const stats = result[0] || { avgRoundsPerSession: 0, totalSessions: 0 };
+    res.json({
+      avgRoundsPerSession: Math.round(stats.avgRoundsPerSession * 100) / 100,
+      totalSessions: stats.totalSessions,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/analytics/ai-usage', async (req, res, next) => {
+  try {
+    const usage = await getUsageAll();
+    const entries = Object.values(usage);
+    const totalCalls = entries.reduce((s, r) => s + (r.calls || 0), 0);
+    const totalTokens = entries.reduce((s, r) => s + (r.tokens || 0), 0);
+    const totalFailures = entries.reduce((s, r) => s + (r.failures || 0), 0);
+    const totalFallbacks = entries.reduce((s, r) => s + (r.fallbacks || 0), 0);
+    res.json({
+      bySession: usage,
+      totals: {
+        calls: totalCalls,
+        tokens: totalTokens,
+        failures: totalFailures,
+        fallbacks: totalFallbacks,
+        fallbackRate: totalCalls > 0 ? totalFallbacks / totalCalls : 0,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/signout', (req, res) => {
+  const session = res.locals.session;
+  const isTokenAuth = session?.user?.name === 'Admin (token)';
+  if (isTokenAuth) {
+    res.json({ ok: true });
+  } else {
+    const base = typeof req.get('origin') === 'string' ? req.get('origin') : '';
+    const callbackUrl = base ? `${base}/admin-portal` : '/admin-portal';
+    res.json({ ok: true, redirect: `/auth/signout?callbackUrl=${encodeURIComponent(callbackUrl)}` });
   }
 });
 

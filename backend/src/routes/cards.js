@@ -65,18 +65,27 @@ router.post('/generate', async (req, res, next) => {
       Math.random() < topUpRate && !isOverLimit(sessionId);
 
     let card = null;
+    let source = 'builtin';
+    let geminiTokens = 0;
+    let geminiSuccess = true;
+
+    let result = null;
     if (useGemini) {
-      const { card: geminiCard, tokens, success } = await generateCard(mode, {
+      result = await generateCard(mode, {
         difficulty,
         country,
         usedSet,
       });
-      recordUsage(sessionId, { tokens, success });
+      geminiTokens = result?.tokens ?? 0;
+      geminiSuccess = result?.success !== false;
+      const geminiCard = result?.card ?? null;
+
       if (geminiCard != null) {
         const key = normalizeCardKey(geminiCard);
         if (usedSet && usedSet.has(key)) card = null;
         else {
           card = geminiCard;
+          source = 'ai';
           console.log('[Gemini] Card generated for mode:', mode);
         }
       }
@@ -87,12 +96,22 @@ router.post('/generate', async (req, res, next) => {
 
     if (card == null && customAvailable.length > 0 && !JSON_MODES.includes(mode)) {
       card = customAvailable[Math.floor(Math.random() * customAvailable.length)];
+      source = 'custom';
     }
     if (card == null) {
       card = getRandomBuiltinCard(mode, { usedSet });
+      source = 'builtin';
     }
 
-    res.json(card);
+    if (useGemini && result != null) {
+      await recordUsage(sessionId, {
+        tokens: geminiTokens,
+        success: geminiSuccess,
+        fallback: source !== 'ai',
+      });
+    }
+
+    res.json({ card, source });
   } catch (err) {
     next(err);
   }

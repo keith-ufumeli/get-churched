@@ -39,6 +39,8 @@ export function ScoreboardPage() {
   const sortedTeams = [...state.teams].sort((a, b) => (b.score || 0) - (a.score || 0))
   const winner = sortedTeams[0]
 
+  const totalRounds = state.teams.length * (state.roundsPerTeam ?? 5)
+
   const saveMutation = useMutation({
     mutationFn: async (data: { displayName: string; teamName?: string }) => {
       const hasTie = state.teams.length >= 2 && sortedTeams[0] && sortedTeams[1] && (sortedTeams[0].score ?? 0) === (sortedTeams[1].score ?? 0)
@@ -48,6 +50,7 @@ export function ScoreboardPage() {
         rounds: state.rounds,
         playedAt: new Date().toISOString(),
         winner: hasTie ? undefined : winner?.name,
+        totalRounds,
         selectedMode: state.selectedMode ?? undefined,
         roundsPerMode: state.totalRoundsForMode || undefined,
         difficulty: state.difficulty,
@@ -79,6 +82,23 @@ export function ScoreboardPage() {
     const timer = setTimeout(() => setShowConfetti(false), 5000)
     return () => clearTimeout(timer)
   }, [isPostGame])
+
+  useEffect(() => {
+    if (!isPostGame || !state.sessionId) return
+    const hasTie = state.teams.length >= 2 && sortedTeams[0] && sortedTeams[1] && (sortedTeams[0].score ?? 0) === (sortedTeams[1].score ?? 0)
+    saveSession({
+      sessionId: state.sessionId,
+      teams: state.teams,
+      rounds: state.rounds,
+      playedAt: new Date().toISOString(),
+      winner: hasTie ? undefined : winner?.name,
+      totalRounds,
+      selectedMode: state.selectedMode ?? undefined,
+      roundsPerMode: state.totalRoundsForMode || undefined,
+      difficulty: state.difficulty,
+    }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- save once when game ends
+  }, [isPostGame, state.sessionId])
 
   const handleSaveToLeaderboard = () => {
     if (!displayName.trim()) {

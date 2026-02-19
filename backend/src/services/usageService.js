@@ -1,6 +1,8 @@
 /**
- * In-memory per-session Gemini API usage tracking.
+ * Per-session Gemini API usage tracking. Persists to MongoDB.
  */
+
+import UsageRecord from '../models/UsageRecord.js';
 
 const store = new Map();
 
@@ -14,16 +16,40 @@ function getKey(sessionId) {
 function getOrCreate(sessionId) {
   const key = getKey(sessionId);
   if (!store.has(key)) {
-    store.set(key, { calls: 0, tokens: 0, failures: 0 });
+    store.set(key, { calls: 0, tokens: 0, failures: 0, fallbacks: 0 });
   }
   return store.get(key);
 }
 
-export function record(sessionId, { tokens = 0, success = true }) {
+/**
+ * Record usage. Persists to MongoDB.
+ * @param {string} sessionId
+ * @param {{ tokens?: number, success?: boolean, fallback?: boolean }} opts
+ */
+export async function record(sessionId, { tokens = 0, success = true, fallback = false }) {
+  const key = getKey(sessionId);
   const entry = getOrCreate(sessionId);
   entry.calls += 1;
   entry.tokens += Number(tokens) || 0;
   if (!success) entry.failures += 1;
+  if (fallback) entry.fallbacks += 1;
+
+  try {
+    await UsageRecord.findOneAndUpdate(
+      { sessionId: key },
+      {
+        $inc: {
+          calls: 1,
+          tokens: Number(tokens) || 0,
+          ...(success ? {} : { failures: 1 }),
+          ...(fallback ? { fallbacks: 1 } : {}),
+        },
+      },
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    console.error('[usageService] Failed to persist usage:', err.message);
+  }
 }
 
 export function get(sessionId) {
@@ -39,10 +65,25 @@ export function isOverLimit(sessionId) {
   return false;
 }
 
-export function getAll() {
-  const out = {};
-  for (const [key, val] of store) {
-    out[key] = { ...val };
+/**
+ * Get all usage. Reads from MongoDB and merges with in-memory store.
+ */
+export async function getAll() {
+  const out = { ...Object.fromEntries(store) };
+  try {
+    const docs = await UsageRecord.find().lean();
+    for (const d of docs) {
+      const key = d.sessionId;
+      const existing = out[key] || { calls: 0, tokens: 0, failures: 0, fallbacks: 0 };
+      out[key] = {
+        calls: Math.max(existing.calls, d.calls || 0),
+        tokens: Math.max(existing.tokens, d.tokens || 0),
+        failures: Math.max(existing.failures, d.failures || 0),
+        fallbacks: Math.max(existing.fallbacks, d.fallbacks || 0),
+      };
+    }
+  } catch (err) {
+    console.error('[usageService] Failed to read usage from DB:', err.message);
   }
   return out;
 }

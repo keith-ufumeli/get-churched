@@ -18,12 +18,17 @@ export interface Team {
   score?: number
 }
 
+export type CardSource = 'ai' | 'builtin' | 'custom'
+
 export interface Round {
   teamName: string
   mode: CardMode
   card: string | TriviaCard | FillInBlankCard | TabooCard
   pointsEarned?: number
   timestamp?: string
+  cardSource?: CardSource | null
+  roundDurationMs?: number
+  skipped?: boolean
 }
 
 export interface TriviaCard {

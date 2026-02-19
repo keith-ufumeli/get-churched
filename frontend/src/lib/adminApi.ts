@@ -82,10 +82,36 @@ export async function adminGetSessions(limit?: number) {
   return data
 }
 
+export async function adminGetAnalyticsModePopularity() {
+  const { data } = await adminApi.get('/admin/analytics/mode-popularity')
+  return data
+}
+
+export async function adminGetAnalyticsDifficultyDistribution() {
+  const { data } = await adminApi.get('/admin/analytics/difficulty-distribution')
+  return data
+}
+
+export async function adminGetAnalyticsSessionStats() {
+  const { data } = await adminApi.get('/admin/analytics/session-stats')
+  return data
+}
+
+export async function adminGetAnalyticsAiUsage() {
+  const { data } = await adminApi.get('/admin/analytics/ai-usage')
+  return data
+}
+
 /** Build the backend sign-in URL; after OAuth user is redirected to callbackUrl. */
 export function getSignInUrl(callbackUrl: string): string {
   const base = API_BASE ? `${API_BASE.replace(/\/$/, '')}/auth` : '/auth'
   const url = `${base}/signin`
   const params = new URLSearchParams({ callbackUrl: callbackUrl })
   return `${url}?${params.toString()}`
+}
+
+/** Sign out. Returns { ok, redirect? }. If redirect, navigate there for OAuth signout. */
+export async function adminSignOut(): Promise<{ ok: boolean; redirect?: string }> {
+  const { data } = await adminApi.post<{ ok: boolean; redirect?: string }>('/admin/signout')
+  return data
 }

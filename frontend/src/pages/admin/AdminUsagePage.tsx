@@ -22,7 +22,7 @@ const chartConfig = {
 }
 
 export function AdminUsagePage() {
-  const [sortKey, setSortKey] = useState<'sessionId' | 'calls' | 'tokens' | 'failures'>('calls')
+  const [sortKey, setSortKey] = useState<'sessionId' | 'calls' | 'tokens' | 'failures' | 'fallbacks'>('calls')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
   const { data: usage = {}, isLoading, refetch } = useQuery({
@@ -32,13 +32,14 @@ export function AdminUsagePage() {
   })
 
   const entries = useMemo(() => {
-    const list = Object.entries(usage as Record<string, { calls: number; tokens: number; failures: number }>).map(
+    const list = Object.entries(usage as Record<string, { calls: number; tokens: number; failures: number; fallbacks?: number }>).map(
       ([sessionId, v]) => ({
         sessionId,
         shortId: sessionId.slice(0, 12) + (sessionId.length > 12 ? '…' : ''),
-        calls: v.calls,
-        tokens: v.tokens,
-        failures: v.failures,
+        calls: v.calls ?? 0,
+        tokens: v.tokens ?? 0,
+        failures: v.failures ?? 0,
+        fallbacks: v.fallbacks ?? 0,
       })
     )
     return [...list].sort((a, b) => {
@@ -156,12 +157,17 @@ export function AdminUsagePage() {
                         Failures
                       </button>
                     </TableHead>
+                    <TableHead>
+                      <button type="button" className="font-medium hover:underline" onClick={() => handleSort('fallbacks')}>
+                        Fallbacks
+                      </button>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {entries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                         No usage recorded yet.
                       </TableCell>
                     </TableRow>
@@ -174,6 +180,7 @@ export function AdminUsagePage() {
                         <TableCell>{e.calls}</TableCell>
                         <TableCell>{e.tokens.toLocaleString()}</TableCell>
                         <TableCell>{e.failures}</TableCell>
+                        <TableCell>{e.fallbacks}</TableCell>
                       </TableRow>
                     ))
                   )}

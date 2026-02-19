@@ -59,8 +59,9 @@ function CardRenderer({ card, mode, onScore }: { card: CardResponse; mode: CardM
 export function RoundPage() {
   const navigate = useNavigate()
   const { state, dispatch } = useGame()
-  const { mutate: generateCard, isPending, card, error } = useCard()
+  const { mutate: generateCard, isPending, card, cardSource, error } = useCard()
   const scoredForRoundRef = useRef(false)
+  const roundStartTimeRef = useRef<number>(0)
   const [showModeCompleteConfetti, setShowModeCompleteConfetti] = useState(false)
 
   const totalRounds = state.teams.length * state.roundsPerTeam
@@ -90,6 +91,12 @@ export function RoundPage() {
       scoredForRoundRef.current = false
     }
   }, [gamePhase, state.rounds.length])
+
+  useEffect(() => {
+    if (gamePhase === 'ROUND_ACTIVE' && card) {
+      roundStartTimeRef.current = Date.now()
+    }
+  }, [gamePhase, card])
 
   useEffect(() => {
     if (gamePhase !== 'MODE_COMPLETE') return
@@ -139,6 +146,7 @@ export function RoundPage() {
     if (!currentTeam) return
 
     scoredForRoundRef.current = true
+    const roundDurationMs = roundStartTimeRef.current > 0 ? Date.now() - roundStartTimeRef.current : undefined
     dispatch({
       type: 'SCORE_ROUND',
       payload: {
@@ -148,6 +156,9 @@ export function RoundPage() {
         pointsEarned: points,
         timestamp: new Date().toISOString(),
         usedCardKey: normalizeCardKey(card),
+        cardSource: cardSource ?? undefined,
+        roundDurationMs,
+        skipped: false,
       },
     })
 
