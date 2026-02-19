@@ -7,10 +7,7 @@ import { getAdminSession, getSignInUrl, setAdminToken } from '@/lib/adminApi'
 import { Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AdminLayout } from '@/components/admin/AdminLayout'
-
-const ADMIN_PATH = typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_PATH
-  ? String(import.meta.env.VITE_ADMIN_PATH)
-  : 'admin-portal'
+import { ADMIN_PATH } from '@/lib/adminConstants'
 
 export function AdminPortalPage() {
   const [tokenInput, setTokenInput] = useState('')
@@ -92,5 +89,3 @@ export function AdminPortalPage() {
 
   return <AdminLayout />
 }
-
-export { ADMIN_PATH }

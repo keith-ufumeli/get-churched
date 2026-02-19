@@ -14,7 +14,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import { LayoutDashboard, BookOpen, Cpu, Settings, Users } from 'lucide-react'
-import { ADMIN_PATH } from '@/pages/AdminPortalPage'
+import { ADMIN_PATH } from '@/lib/adminConstants'
 
 const adminBase = ADMIN_PATH.startsWith('/') ? ADMIN_PATH : `/${ADMIN_PATH}`
 
