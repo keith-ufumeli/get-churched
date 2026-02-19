@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   getAdminSession,
   getSignInUrl,
+  setAdminToken,
   adminGetWords,
   adminAddWord,
   adminDeleteWord,
@@ -24,12 +25,30 @@ const ADMIN_PATH = typeof import.meta !== 'undefined' && import.meta.env?.VITE_A
 
 export function AdminPortalPage() {
   const queryClient = useQueryClient()
-  const { data: session, isLoading } = useQuery({
+  const [tokenInput, setTokenInput] = useState('')
+  const { data: session, isLoading, refetch } = useQuery({
     queryKey: ['admin', 'session'],
     queryFn: getAdminSession,
     retry: false,
   })
   const authenticated = Boolean(session?.user)
+
+  const handleTokenSignIn = async () => {
+    const token = tokenInput.trim()
+    if (!token) {
+      toast.error('Enter an admin token')
+      return
+    }
+    setAdminToken(token)
+    setTokenInput('')
+    const result = await refetch()
+    if (result.data?.user) {
+      toast.success('Signed in with token')
+    } else {
+      setAdminToken('')
+      toast.error('Invalid admin token')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -53,10 +72,30 @@ export function AdminPortalPage() {
             <Lock className="h-6 w-6" />
             <h1 className="text-xl font-bold">Admin access</h1>
           </div>
-          <p className="text-sm text-warmBrown">Sign in with GitHub to access the admin portal.</p>
+          <p className="text-sm text-warmBrown">Sign in with GitHub or use an admin token.</p>
           <Button asChild className="w-full">
             <a href={signInUrl}>Sign in with GitHub</a>
           </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-warmBrown/30" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase text-warmBrown/70">
+              <span className="bg-parchment px-2">or</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Input
+              type="password"
+              placeholder="Admin token"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleTokenSignIn()}
+            />
+            <Button variant="outline" onClick={handleTokenSignIn} className="w-full">
+              Sign in with token
+            </Button>
+          </div>
         </Card>
       </div>
     )

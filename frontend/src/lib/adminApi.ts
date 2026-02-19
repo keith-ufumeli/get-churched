@@ -4,12 +4,41 @@ const API_BASE = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API
   ? String(import.meta.env.VITE_API_URL).replace(/\/$/, '')
   : ''
 
+const ADMIN_TOKEN_KEY = 'adminToken'
+
+function getStoredToken(): string {
+  try {
+    return sessionStorage.getItem(ADMIN_TOKEN_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+export function setAdminToken(token: string) {
+  try {
+    if (token) sessionStorage.setItem(ADMIN_TOKEN_KEY, token)
+    else sessionStorage.removeItem(ADMIN_TOKEN_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearAdminToken() {
+  setAdminToken('')
+}
+
 const adminApi = axios.create({
   baseURL: API_BASE ? `${API_BASE}/api` : '/api',
   withCredentials: true,
 })
 
-/** Check if the current user has an admin session (cookie). Returns session or null. */
+adminApi.interceptors.request.use((config) => {
+  const token = getStoredToken()
+  if (token) config.headers['X-Admin-Token'] = token
+  return config
+})
+
+/** Check if the current user has an admin session (cookie or valid token). Returns session or null. */
 export async function getAdminSession(): Promise<{ user?: { name?: string; email?: string; image?: string } } | null> {
   try {
     const { data } = await adminApi.get<{ user?: { name?: string; email?: string; image?: string } }>('/admin/session')
