@@ -27,9 +27,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { adminGetWords, adminAddWord, adminDeleteWord } from '@/lib/adminApi'
 import { GAME_MODES } from '@/lib/gameModes'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const PAGE_SIZE = 10
@@ -45,7 +46,7 @@ export function AdminWordsPage() {
   const [filterMode, setFilterMode] = useState<string>('')
   const [deleteTarget, setDeleteTarget] = useState<WordRow | null>(null)
 
-  const { data: words = [], isLoading, refetch } = useQuery({
+  const { data: words = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'words'],
     queryFn: () => adminGetWords(),
     refetchOnWindowFocus: false,
@@ -118,6 +119,19 @@ export function AdminWordsPage() {
           <p className="text-muted-foreground">Manage custom words per mode.</p>
         </div>
       </div>
+
+      {isError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Failed to load words</AlertTitle>
+          <AlertDescription>
+            Could not load the words list. Please try again.
+            <Button variant="outline" size="sm" className="ml-2 mt-2" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

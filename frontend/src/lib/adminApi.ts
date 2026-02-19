@@ -102,6 +102,11 @@ export async function adminGetAnalyticsAiUsage() {
   return data
 }
 
+export async function adminGetAnalyticsCustomWords() {
+  const { data } = await adminApi.get('/admin/analytics/custom-words')
+  return data
+}
+
 /** Build the backend sign-in URL; after OAuth user is redirected to callbackUrl. */
 export function getSignInUrl(callbackUrl: string): string {
   const base = API_BASE ? `${API_BASE.replace(/\/$/, '')}/auth` : '/auth'

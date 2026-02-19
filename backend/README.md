@@ -45,6 +45,8 @@ ALLOWED_ORIGIN=http://localhost:5173
 | `GEMINI_SOFT_LIMIT_TOKENS` | Optional. Per-session max tokens; over this use built-in only (default 500000). |
 | `ADMIN_SECRET` | Secret token for admin API; set `X-Admin-Token` header to this value. |
 | `ALLOWED_ORIGIN` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
+| `RATE_LIMIT_API_MAX` | Optional. General API rate limit: requests per 15 min per IP (default `100`). |
+| `RATE_LIMIT_CARDS_MAX` | Optional. Cards generation rate limit: requests per 15 min per IP (default `250`). Higher than general API to avoid 429s during gameplay. |
 
 ### 3. Run
 
@@ -106,6 +108,7 @@ backend/
 
 - **Never** call the Gemini API from the frontend. All AI requests go through this backend so the API key stays in `.env` only.
 - `.env` is listed in `.gitignore`; keep it that way.
+- **Rate limiting:** General API routes are limited to 100 requests per 15 min per IP; `/api/cards` has a higher limit (250) so gameplay does not hit 429s. Override via `RATE_LIMIT_API_MAX` and `RATE_LIMIT_CARDS_MAX`.
 
 ---
 

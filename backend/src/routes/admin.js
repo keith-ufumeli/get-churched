@@ -155,6 +155,18 @@ router.get('/analytics/ai-usage', async (req, res, next) => {
   }
 });
 
+router.get('/analytics/custom-words', async (req, res, next) => {
+  try {
+    const result = await CustomWord.aggregate([
+      { $group: { _id: '$mode', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+    res.json(result.map((r) => ({ mode: r._id, count: r.count })));
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/signout', (req, res) => {
   const session = res.locals.session;
   const isTokenAuth = session?.user?.name === 'Admin (token)';

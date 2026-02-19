@@ -1,10 +1,21 @@
 import { useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
-import { adminGetWords, adminGetUsage, adminGetSessions } from '@/lib/adminApi'
+import {
+  adminGetWords,
+  adminGetUsage,
+  adminGetSessions,
+  adminGetAnalyticsSessionStats,
+  adminGetAnalyticsModePopularity,
+  adminGetAnalyticsDifficultyDistribution,
+  adminGetAnalyticsCustomWords,
+} from '@/lib/adminApi'
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { AlertCircle } from 'lucide-react'
 
 const chartConfig = {
   calls: { label: 'Calls', color: 'hsl(var(--chart-1))' },
@@ -13,21 +24,54 @@ const chartConfig = {
 }
 
 export function AdminDashboardPage() {
-  const { data: words = [], isLoading: wordsLoading } = useQuery({
+  const queryClient = useQueryClient()
+  const { data: words = [], isLoading: wordsLoading, isError: wordsError } = useQuery({
     queryKey: ['admin', 'words'],
     queryFn: () => adminGetWords(),
     refetchOnWindowFocus: false,
   })
-  const { data: usage = {}, isLoading: usageLoading } = useQuery({
+  const { data: usage = {}, isLoading: usageLoading, isError: usageError } = useQuery({
     queryKey: ['admin', 'usage'],
     queryFn: adminGetUsage,
     refetchOnWindowFocus: false,
   })
-  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
+  const { data: sessions = [], isLoading: sessionsLoading, isError: sessionsError } = useQuery({
     queryKey: ['admin', 'sessions'],
     queryFn: () => adminGetSessions(50),
     refetchOnWindowFocus: false,
   })
+  const { data: sessionStats, isError: sessionStatsError } = useQuery({
+    queryKey: ['admin', 'analytics', 'session-stats'],
+    queryFn: adminGetAnalyticsSessionStats,
+    refetchOnWindowFocus: false,
+  })
+  const { data: modePopularity = [], isError: modePopularityError } = useQuery({
+    queryKey: ['admin', 'analytics', 'mode-popularity'],
+    queryFn: adminGetAnalyticsModePopularity,
+    refetchOnWindowFocus: false,
+  })
+  const { data: difficultyDistribution = [], isError: difficultyDistributionError } = useQuery({
+    queryKey: ['admin', 'analytics', 'difficulty-distribution'],
+    queryFn: adminGetAnalyticsDifficultyDistribution,
+    refetchOnWindowFocus: false,
+  })
+  const { data: customWordsByMode = [], isError: customWordsError } = useQuery({
+    queryKey: ['admin', 'analytics', 'custom-words'],
+    queryFn: adminGetAnalyticsCustomWords,
+    refetchOnWindowFocus: false,
+  })
+
+  const hasError =
+    wordsError ||
+    usageError ||
+    sessionsError ||
+    sessionStatsError ||
+    modePopularityError ||
+    difficultyDistributionError ||
+    customWordsError
+  const handleRetry = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin'] })
+  }
 
   const usageEntries = useMemo(
     () =>
@@ -78,6 +122,19 @@ export function AdminDashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Overview and metrics.</p>
       </div>
+
+      {hasError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Failed to load data</AlertTitle>
+          <AlertDescription>
+            Some data could not be loaded. Please try again.
+            <Button variant="outline" size="sm" className="ml-2 mt-2" onClick={handleRetry}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -137,6 +194,67 @@ export function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Insights</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Analytics from session data: mode popularity, difficulty, and custom words.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {sessionStats && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Avg rounds per session</p>
+                  <p className="text-xl font-semibold">{sessionStats.avgRoundsPerSession ?? 0}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total sessions (analytics)</p>
+                  <p className="text-xl font-semibold">{sessionStats.totalSessions ?? 0}</p>
+                </div>
+              </>
+            )}
+            {modePopularity.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Most played mode</p>
+                <p className="text-xl font-semibold">{modePopularity[0]?.mode ?? '—'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {modePopularity[0]?.count ?? 0} rounds
+                </p>
+              </div>
+            )}
+            {difficultyDistribution.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Most common difficulty</p>
+                <p className="text-xl font-semibold">{difficultyDistribution[0]?.difficulty ?? '—'}</p>
+                <p className="text-xs text-muted-foreground">
+                  {difficultyDistribution[0]?.count ?? 0} sessions
+                </p>
+              </div>
+            )}
+            {customWordsByMode.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Custom words by mode</p>
+                <p className="text-sm font-semibold">
+                  {customWordsByMode
+                    .map((r: { mode: string; count: number }) => `${r.mode}: ${r.count}`)
+                    .join(', ')}
+                </p>
+              </div>
+            )}
+            {!sessionStats &&
+              modePopularity.length === 0 &&
+              difficultyDistribution.length === 0 &&
+              customWordsByMode.length === 0 && (
+                <p className="col-span-full text-sm text-muted-foreground">
+                  No analytics data yet. Play some games to see insights.
+                </p>
+              )}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

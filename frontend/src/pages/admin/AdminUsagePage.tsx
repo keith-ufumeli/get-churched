@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
   Table,
   TableBody,
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { adminGetUsage } from '@/lib/adminApi'
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 
 const chartConfig = {
   calls: { label: 'Calls', color: 'hsl(var(--chart-1))' },
@@ -25,7 +26,7 @@ export function AdminUsagePage() {
   const [sortKey, setSortKey] = useState<'sessionId' | 'calls' | 'tokens' | 'failures' | 'fallbacks'>('calls')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
-  const { data: usage = {}, isLoading, refetch } = useQuery({
+  const { data: usage = {}, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'usage'],
     queryFn: adminGetUsage,
     refetchOnWindowFocus: false,
@@ -76,6 +77,19 @@ export function AdminUsagePage() {
           Refresh
         </Button>
       </div>
+
+      {isError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Failed to load usage data</AlertTitle>
+          <AlertDescription>
+            Could not load AI usage metrics. Please try again.
+            <Button variant="outline" size="sm" className="ml-2 mt-2" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

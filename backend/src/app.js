@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
-import rateLimiter from './middleware/rateLimiter.js';
+import { apiLimiter, cardsLimiter } from './middleware/rateLimiter.js';
 import errorHandler from './middleware/errorHandler.js';
 import { adminSessionAuth } from './middleware/adminSessionAuth.js';
 import { optionalAdminSession } from './middleware/optionalAdminSession.js';
@@ -37,7 +37,11 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.use('/api', rateLimiter);
+app.use('/api/cards', cardsLimiter);
+app.use('/api', (req, res, next) => {
+  if (req.originalUrl.startsWith('/api/cards')) return next();
+  return apiLimiter(req, res, next);
+});
 app.use('/api/cards', cardsRouter);
 app.use('/api/mode-words', modeWordsRouter);
 app.use('/api/sessions', sessionsRouter);

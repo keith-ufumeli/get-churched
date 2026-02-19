@@ -11,8 +11,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { adminGetSessions } from '@/lib/adminApi'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 
 const PAGE_SIZE = 10
 type SessionRow = {
@@ -29,7 +30,7 @@ export function AdminSessionsPage() {
   const [sortKey, setSortKey] = useState<keyof SessionRow>('playedAt')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
-  const { data: sessions = [], isLoading, refetch } = useQuery({
+  const { data: sessions = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'sessions'],
     queryFn: () => adminGetSessions(50),
     refetchOnWindowFocus: false,
@@ -83,6 +84,19 @@ export function AdminSessionsPage() {
           Refresh
         </Button>
       </div>
+
+      {isError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Failed to load sessions</AlertTitle>
+          <AlertDescription>
+            Could not load session history. Please try again.
+            <Button variant="outline" size="sm" className="ml-2 mt-2" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

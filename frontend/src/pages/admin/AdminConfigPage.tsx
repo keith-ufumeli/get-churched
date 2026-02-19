@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { adminGetConfig, adminPatchConfig } from '@/lib/adminApi'
 import { GAME_MODES } from '@/lib/gameModes'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export function AdminConfigPage() {
@@ -15,7 +16,7 @@ export function AdminConfigPage() {
   const [draftRate, setDraftRate] = useState<number | null>(null)
   const [draftModes, setDraftModes] = useState<string[] | null>(null)
 
-  const { data: config, isLoading, refetch } = useQuery({
+  const { data: config, isLoading, isError, refetch } = useQuery({
     queryKey: ['admin', 'config'],
     queryFn: adminGetConfig,
     refetchOnWindowFocus: false,
@@ -63,6 +64,27 @@ export function AdminConfigPage() {
           <p className="text-muted-foreground">Top-up rate and enabled modes.</p>
         </div>
         <Skeleton className="h-[200px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Config</h1>
+          <p className="text-muted-foreground">Top-up rate and enabled modes.</p>
+        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Failed to load config</AlertTitle>
+          <AlertDescription>
+            Could not load configuration. Please try again.
+            <Button variant="outline" size="sm" className="ml-2 mt-2" onClick={() => refetch()}>
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }
