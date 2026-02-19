@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import rateLimiter from './middleware/rateLimiter.js';
 import errorHandler from './middleware/errorHandler.js';
 import { adminSessionAuth } from './middleware/adminSessionAuth.js';
+import { optionalAdminSession } from './middleware/optionalAdminSession.js';
 import { auth } from './auth.config.js';
 import cardsRouter from './routes/cards.js';
 import modeWordsRouter from './routes/modeWords.js';
@@ -40,6 +41,10 @@ app.use('/api/cards', cardsRouter);
 app.use('/api/mode-words', modeWordsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/leaderboard', leaderboardRouter);
+// Session check is public (200 + { user: null } when not logged in); rest of admin requires auth
+app.get('/api/admin/session', optionalAdminSession, (req, res) => {
+  res.json(res.locals.session ?? { user: null });
+});
 app.use('/api/admin', adminSessionAuth, adminRouter);
 
 app.use(errorHandler);

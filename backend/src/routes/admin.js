@@ -8,9 +8,7 @@ import { builtinCards } from '../data/builtinCards.js';
 const router = express.Router();
 const VALID_MODES = Object.keys(builtinCards);
 
-router.get('/session', (req, res) => {
-  res.json(res.locals.session ?? { user: null });
-});
+// GET /session is handled in app.js (optional auth); all routes here require adminSessionAuth
 
 router.get('/words', async (req, res, next) => {
   try {

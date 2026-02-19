@@ -23,6 +23,8 @@ export const authConfig = {
       VerificationTokens: 'auth_verification_tokens',
     },
   }),
+  // Force non-secure cookies in dev (http://localhost) so browser stores the session cookie
+  useSecureCookies: process.env.NODE_ENV === 'production' && process.env.AUTH_URL?.startsWith('https'),
   session: {
     strategy: 'database',
     maxAge: 30 * 24 * 60 * 60, // 30 days
