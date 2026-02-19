@@ -12,8 +12,31 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': { target: 'http://localhost:3001', changeOrigin: true },
-      '/auth': { target: 'http://localhost:3001', changeOrigin: true },
+      // Proxy to backend; send original host so Auth.js sees 5173 and sets cookies for same origin
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const host = req.headers.host || 'localhost:5173'
+            proxyReq.setHeader('Host', host)
+            proxyReq.setHeader('X-Forwarded-Host', host)
+            proxyReq.setHeader('X-Forwarded-Proto', req.headers['x-forwarded-proto'] || 'http')
+          })
+        },
+      },
+      '/auth': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const host = req.headers.host || 'localhost:5173'
+            proxyReq.setHeader('Host', host)
+            proxyReq.setHeader('X-Forwarded-Host', host)
+            proxyReq.setHeader('X-Forwarded-Proto', req.headers['x-forwarded-proto'] || 'http')
+          })
+        },
+      },
     },
   },
 })
