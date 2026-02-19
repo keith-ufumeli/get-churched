@@ -59,7 +59,7 @@ function CardRenderer({ card, mode, onScore }: { card: CardResponse; mode: CardM
 export function RoundPage() {
   const navigate = useNavigate()
   const { state, dispatch } = useGame()
-  const { mutate: generateCard, isPending, card, cardSource, error } = useCard()
+  const { generate: generateCard, isPending, card, cardSource, error, reset: resetCard } = useCard()
   const scoredForRoundRef = useRef(false)
   const roundStartTimeRef = useRef<number>(0)
   const [showModeCompleteConfetti, setShowModeCompleteConfetti] = useState(false)
@@ -89,8 +89,9 @@ export function RoundPage() {
   useEffect(() => {
     if (gamePhase === 'ROUND_ACTIVE') {
       scoredForRoundRef.current = false
+      resetCard()
     }
-  }, [gamePhase, state.rounds.length])
+  }, [gamePhase, state.rounds.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (gamePhase === 'ROUND_ACTIVE' && card) {
@@ -119,16 +120,15 @@ export function RoundPage() {
 
   useEffect(() => {
     if (error && mode) {
-      toast.error('Failed to load card. Using fallback card.')
-      setTimeout(() => generateCard({ ...cardOptions, mode }), 1000)
+      toast.error('Failed to load card. Please try again.')
     }
-  }, [error]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [error, mode])
 
   useEffect(() => {
-    if (gamePhase === 'ROUND_ACTIVE' && state.selectedMode && !card && !isPending) {
+    if (gamePhase === 'ROUND_ACTIVE' && state.selectedMode && !card && !isPending && !error) {
       generateCard({ ...cardOptions, mode: state.selectedMode })
     }
-  }, [gamePhase, state.selectedMode, card, isPending]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gamePhase, state.selectedMode, card, isPending, error]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRoundSetComplete = (selectedMode: CardMode, roundsPerMode: number) => {
     dispatch({ type: 'START_ROUND_SET', payload: { selectedMode, roundsPerMode } })
@@ -283,7 +283,24 @@ export function RoundPage() {
             )}
             {gamePhase === 'ROUND_ACTIVE' && (
               <>
-                {isPending || !card || !mode ? (
+                {error && !isPending ? (
+                  <Card className="p-12 flex items-center justify-center min-h-[400px]">
+                    <div className="text-center space-y-4">
+                      <p className="text-destructive font-medium">Failed to load card</p>
+                      <p className="text-warmBrown text-sm">The server may be busy. Try again in a moment.</p>
+                      <Button
+                        onClick={() => {
+                          resetCard()
+                          if (state.selectedMode) {
+                            generateCard({ ...cardOptions, mode: state.selectedMode })
+                          }
+                        }}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  </Card>
+                ) : isPending || !card || !mode ? (
                   <Card className="p-12 flex items-center justify-center min-h-[400px]">
                     <div className="text-center space-y-4">
                       <Loader2 className="h-12 w-12 animate-spin text-mahogany mx-auto" />
