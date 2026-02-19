@@ -49,7 +49,7 @@ export function ScoreboardPage() {
         playedAt: new Date().toISOString(),
         winner: hasTie ? undefined : winner?.name,
         selectedMode: state.selectedMode ?? undefined,
-        roundsPerMode: state.roundsPerMode || undefined,
+        roundsPerMode: state.totalRoundsForMode || undefined,
         difficulty: state.difficulty,
       })
       return fetch('/api/leaderboard', {

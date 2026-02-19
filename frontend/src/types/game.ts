@@ -63,6 +63,15 @@ export interface Session {
 
 export type GameStatus = 'idle' | 'setup' | 'playing' | 'finished'
 
+export type GamePhase =
+  | 'SETUP'
+  | 'MODE_SELECTED'
+  | 'SHOW_RULES'
+  | 'ROUND_ACTIVE'
+  | 'ROUND_RESULT'
+  | 'MODE_COMPLETE'
+  | 'GAME_COMPLETE'
+
 export interface GameState {
   sessionId: string | null
   teams: Team[]
@@ -70,11 +79,14 @@ export interface GameState {
   currentTeamIndex: number
   roundsPerTeam: number
   status: GameStatus
+  gamePhase: GamePhase
   difficulty: Difficulty
   hymnCountry: string
   selectedMode: CardMode | null
-  roundsPerMode: number
-  roundsPlayedInSet: number
+  /** Total rounds for the current mode set (locked until set complete). */
+  totalRoundsForMode: number
+  /** 0-based index of rounds completed in current set. */
+  currentRoundIndexInSet: number
   usedCards: string[]
 }
 
@@ -83,7 +95,10 @@ export type ScoreRoundPayload = Round & { usedCardKey?: string }
 export type GameAction =
   | { type: 'START_GAME'; payload: Partial<GameState> }
   | { type: 'START_ROUND_SET'; payload: { selectedMode: CardMode; roundsPerMode: number } }
+  | { type: 'DISMISS_RULES' }
   | { type: 'SCORE_ROUND'; payload: ScoreRoundPayload }
+  | { type: 'NEXT_ROUND' }
+  | { type: 'CLEAR_MODE_COMPLETE' }
   | { type: 'END_GAME' }
   | { type: 'RESET' }
 

@@ -24,6 +24,16 @@ export function ResultPage() {
   const isGameComplete = roundsCompleted >= totalRounds
 
   useEffect(() => {
+    if (state.status === 'playing') {
+      const onBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault()
+      }
+      window.addEventListener('beforeunload', onBeforeUnload)
+      return () => window.removeEventListener('beforeunload', onBeforeUnload)
+    }
+  }, [state.status])
+
+  useEffect(() => {
     if (!lastRound) {
       navigate('/round')
       return
@@ -39,8 +49,8 @@ export function ResultPage() {
   }, [lastRound, navigate])
 
   const handleNext = () => {
+    dispatch({ type: 'NEXT_ROUND' })
     if (isGameComplete) {
-      dispatch({ type: 'END_GAME' })
       navigate('/scoreboard')
     } else {
       navigate('/round')
