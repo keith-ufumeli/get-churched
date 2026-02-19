@@ -1,12 +1,16 @@
-const express = require('express');
-const router = express.Router();
-const CustomWord = require('../models/CustomWord');
-const Session = require('../models/Session');
-const usageService = require('../services/usageService');
-const geminiConfig = require('../config/geminiConfig');
-const { builtinCards } = require('../data/builtinCards');
+import express from 'express';
+import CustomWord from '../models/CustomWord.js';
+import Session from '../models/Session.js';
+import { getAll as getUsageAll } from '../services/usageService.js';
+import { getConfig, updateConfig } from '../config/geminiConfig.js';
+import { builtinCards } from '../data/builtinCards.js';
 
+const router = express.Router();
 const VALID_MODES = Object.keys(builtinCards);
+
+router.get('/session', (req, res) => {
+  res.json(res.locals.session ?? { user: null });
+});
 
 router.get('/words', async (req, res, next) => {
   try {
@@ -50,16 +54,16 @@ router.delete('/words/:id', async (req, res, next) => {
 });
 
 router.get('/usage', (req, res) => {
-  const usage = usageService.getAll();
+  const usage = getUsageAll();
   res.json(usage);
 });
 
 router.get('/config', (req, res) => {
-  res.json(geminiConfig.getConfig());
+  res.json(getConfig());
 });
 
 router.patch('/config', (req, res) => {
-  const updated = geminiConfig.updateConfig(req.body || {});
+  const updated = updateConfig(req.body || {});
   res.json(updated);
 });
 
@@ -77,4 +81,4 @@ router.get('/sessions', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

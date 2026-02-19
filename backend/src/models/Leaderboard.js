@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const LeaderboardSchema = new mongoose.Schema({
   displayName: { type: String, required: true },
@@ -8,4 +8,4 @@ const LeaderboardSchema = new mongoose.Schema({
   achievedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Leaderboard', LeaderboardSchema);
+export default mongoose.model('Leaderboard', LeaderboardSchema);

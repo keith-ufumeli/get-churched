@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = process.env.GEMINI_API_KEY
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
@@ -41,13 +41,7 @@ function buildPrompt(mode, opts = {}) {
 
 const JSON_MODES = ['trivia', 'fillinblank', 'taboo'];
 
-/**
- * Generate a card using the Gemini API. Returns null on any error (caller should use built-in deck).
- * @param {string} mode - Card mode (sing, act, trivia, etc.)
- * @param {{ difficulty?: string, country?: string, usedSet?: Set<string> }} opts - Optional context
- * @returns {Promise<string|object|null>} Card content or null
- */
-async function generateCard(mode, opts = {}) {
+export async function generateCard(mode, opts = {}) {
   if (!genAI) {
     console.log('[Gemini] No API key configured, skipping Gemini');
     return null;
@@ -88,5 +82,3 @@ async function generateCard(mode, opts = {}) {
     return { card: null, tokens: 0, success: false };
   }
 }
-
-module.exports = { generateCard };

@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import Leaderboard from '../models/Leaderboard.js';
+
 const router = express.Router();
-const Leaderboard = require('../models/Leaderboard');
 
 router.get('/', async (req, res, next) => {
   try {
@@ -39,4 +40,4 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,6 +1,6 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
-const app = require('./src/app');
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import app from './src/app.js';
 
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/get-churched';

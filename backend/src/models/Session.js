@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const SessionSchema = new mongoose.Schema({
   sessionId: { type: String, required: true, unique: true },
@@ -22,4 +22,4 @@ const SessionSchema = new mongoose.Schema({
   difficulty: { type: String, default: null },
 });
 
-module.exports = mongoose.model('Session', SessionSchema);
+export default mongoose.model('Session', SessionSchema);

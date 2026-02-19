@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const CustomWordSchema = new mongoose.Schema({
   mode: { type: String, required: true },
@@ -11,4 +11,4 @@ const CustomWordSchema = new mongoose.Schema({
 
 CustomWordSchema.index({ mode: 1, word: 1 }, { unique: true });
 
-module.exports = mongoose.model('CustomWord', CustomWordSchema);
+export default mongoose.model('CustomWord', CustomWordSchema);

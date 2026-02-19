@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import CustomWord from '../models/CustomWord.js';
+import { builtinCards } from '../data/builtinCards.js';
+
 const router = express.Router();
-const CustomWord = require('../models/CustomWord');
-const { builtinCards } = require('../data/builtinCards');
 
 const VALID_MODES = Object.keys(builtinCards);
 
@@ -34,4 +35,4 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

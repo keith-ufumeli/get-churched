@@ -3,7 +3,7 @@
  * Keys match API mode names; each value is an array of cards (string or object per mode).
  */
 
-const builtinCards = {
+export const builtinCards = {
   sing: ['Grace', 'Love', 'Peace', 'Holy', 'Spirit', 'Praise', 'Glory', 'Faith'],
   act: ['Noah and the Ark', 'David and Goliath', 'The Good Samaritan'],
   explain: ['Faith', 'Redemption', 'Covenant'],
@@ -33,7 +33,7 @@ const builtinCards = {
  * @param {string|object} card - Card content
  * @returns {string} Normalized key
  */
-function normalizeCardKey(card) {
+export function normalizeCardKey(card) {
   if (card == null) return '';
   if (typeof card === 'string') return card.trim().toLowerCase();
   return JSON.stringify(card).trim().toLowerCase();
@@ -45,7 +45,7 @@ function normalizeCardKey(card) {
  * @param {{ usedSet?: Set<string> }} opts - Optional: Set of normalized keys to exclude
  * @returns {string|object} Card content (string for simple modes, object for trivia/fillinblank/taboo)
  */
-function getRandomBuiltinCard(mode, opts = {}) {
+export function getRandomBuiltinCard(mode, opts = {}) {
   const { usedSet } = opts;
   let cards = builtinCards[mode];
   if (!cards || cards.length === 0) {
@@ -60,4 +60,3 @@ function getRandomBuiltinCard(mode, opts = {}) {
   return cards[Math.floor(Math.random() * cards.length)];
 }
 
-module.exports = { builtinCards, getRandomBuiltinCard, normalizeCardKey };

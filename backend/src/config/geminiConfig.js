@@ -3,7 +3,7 @@
  * Cards route reads topUpRate and enabledModes from here when available.
  */
 
-const { builtinCards } = require('../data/builtinCards');
+import { builtinCards } from '../data/builtinCards.js';
 const VALID_MODES = Object.keys(builtinCards);
 
 const config = {
@@ -48,4 +48,4 @@ function updateConfig(updates) {
   return getConfig();
 }
 
-module.exports = { getTopUpRate, getEnabledModes, getConfig, updateConfig };
+export { getTopUpRate, getEnabledModes, getConfig, updateConfig };

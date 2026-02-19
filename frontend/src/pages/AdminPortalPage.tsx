@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  getAdminSession,
+  getSignInUrl,
   adminGetWords,
   adminAddWord,
   adminDeleteWord,
@@ -12,7 +14,6 @@ import {
   adminGetConfig,
   adminPatchConfig,
   adminGetSessions,
-  setAdminToken,
 } from '@/lib/adminApi'
 import { Lock, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -21,36 +22,30 @@ const ADMIN_PATH = typeof import.meta !== 'undefined' && import.meta.env?.VITE_A
   ? String(import.meta.env.VITE_ADMIN_PATH)
   : 'admin-portal'
 
-const ADMIN_TOKEN_KEY = 'adminToken'
-
-function getStoredToken(): string {
-  try {
-    return sessionStorage.getItem(ADMIN_TOKEN_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
 export function AdminPortalPage() {
-  const [tokenInput, setTokenInput] = useState('')
-  const [authenticated, setAuthenticated] = useState(() => {
-    const t = getStoredToken() || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ADMIN_TOKEN ? String(import.meta.env.VITE_ADMIN_TOKEN) : '')
-    return Boolean(t)
-  })
   const queryClient = useQueryClient()
+  const { data: session, isLoading } = useQuery({
+    queryKey: ['admin', 'session'],
+    queryFn: getAdminSession,
+    retry: false,
+  })
+  const authenticated = Boolean(session?.user)
 
-  const handleUnlock = () => {
-    const t = tokenInput.trim()
-    if (!t) {
-      toast.error('Enter a token')
-      return
-    }
-    setAdminToken(t)
-    setTokenInput('')
-    setAuthenticated(true)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-parchment p-6 font-sans flex items-center justify-center">
+        <Card className="p-8 max-w-md w-full">
+          <p className="text-warmBrown">Checking session…</p>
+        </Card>
+      </div>
+    )
   }
 
   if (!authenticated) {
+    const callbackUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/${ADMIN_PATH.replace(/^\/+|\/+$/g, '')}`
+      : ''
+    const signInUrl = getSignInUrl(callbackUrl)
     return (
       <div className="min-h-screen bg-parchment p-6 font-sans flex items-center justify-center">
         <Card className="p-8 max-w-md w-full space-y-4">
@@ -58,16 +53,9 @@ export function AdminPortalPage() {
             <Lock className="h-6 w-6" />
             <h1 className="text-xl font-bold">Admin access</h1>
           </div>
-          <p className="text-sm text-warmBrown">Enter the admin secret token to continue.</p>
-          <Input
-            type="password"
-            placeholder="Admin token"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
-          />
-          <Button onClick={handleUnlock} className="w-full">
-            Unlock
+          <p className="text-sm text-warmBrown">Sign in with GitHub to access the admin portal.</p>
+          <Button asChild className="w-full">
+            <a href={signInUrl}>Sign in with GitHub</a>
           </Button>
         </Card>
       </div>

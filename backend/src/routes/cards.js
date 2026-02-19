@@ -1,14 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const geminiService = require('../services/geminiService');
-const {
+import express from 'express';
+import { generateCard } from '../services/geminiService.js';
+import {
   getRandomBuiltinCard,
   builtinCards,
   normalizeCardKey,
-} = require('../data/builtinCards');
-const CustomWord = require('../models/CustomWord');
-const usageService = require('../services/usageService');
-const geminiConfig = require('../config/geminiConfig');
+} from '../data/builtinCards.js';
+import CustomWord from '../models/CustomWord.js';
+import { record as recordUsage, isOverLimit } from '../services/usageService.js';
+import { getTopUpRate, getEnabledModes } from '../config/geminiConfig.js';
+
+const router = express.Router();
 
 const VALID_MODES = Object.keys(builtinCards);
 const JSON_MODES = ['trivia', 'fillinblank', 'taboo'];
@@ -46,7 +47,7 @@ router.post('/generate', async (req, res, next) => {
     if (!mode || typeof mode !== 'string' || !VALID_MODES.includes(mode)) {
       return res.status(400).json({ error: 'Invalid or missing mode. Use one of: ' + VALID_MODES.join(', ') });
     }
-    const enabledModes = geminiConfig.getEnabledModes();
+    const enabledModes = getEnabledModes();
     if (!enabledModes.includes(mode)) {
       return res.status(400).json({ error: 'This mode is currently disabled' });
     }
@@ -59,18 +60,18 @@ router.post('/generate', async (req, res, next) => {
       country: country != null ? String(country) : null,
     });
 
-    const topUpRate = geminiConfig.getTopUpRate();
+    const topUpRate = getTopUpRate();
     const useGemini =
-      Math.random() < topUpRate && !usageService.isOverLimit(sessionId);
+      Math.random() < topUpRate && !isOverLimit(sessionId);
 
     let card = null;
     if (useGemini) {
-      const { card: geminiCard, tokens, success } = await geminiService.generateCard(mode, {
+      const { card: geminiCard, tokens, success } = await generateCard(mode, {
         difficulty,
         country,
         usedSet,
       });
-      usageService.record(sessionId, { tokens, success });
+      recordUsage(sessionId, { tokens, success });
       if (geminiCard != null) {
         const key = normalizeCardKey(geminiCard);
         if (usedSet && usedSet.has(key)) card = null;
@@ -97,4 +98,4 @@ router.post('/generate', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;
