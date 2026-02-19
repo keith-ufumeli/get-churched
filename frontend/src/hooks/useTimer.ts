@@ -11,7 +11,7 @@ interface UseTimerReturn {
 export function useTimer(initialDuration: number, onComplete?: () => void): UseTimerReturn {
   const [timeLeft, setTimeLeft] = useState(initialDuration)
   const [isRunning, setIsRunning] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const start = useCallback(() => {
     setIsRunning(true)

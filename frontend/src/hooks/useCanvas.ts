@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react'
 
 interface UseCanvasReturn {
-  canvasRef: React.RefObject<HTMLCanvasElement>
+  canvasRef: React.RefObject<HTMLCanvasElement | null>
   clearCanvas: () => void
   getImageData: () => string | null
 }
