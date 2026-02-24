@@ -5,6 +5,13 @@ import { useGame } from '@/hooks/useGame'
 import { TeamSetup } from '@/components/game/TeamSetup'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type { Team, Difficulty } from '@/types/game'
 import { ArrowRight, ArrowLeft, Sparkles, Play } from 'lucide-react'
@@ -260,15 +267,18 @@ export function SetupPage() {
                     <label className="block text-sm font-semibold text-mahogany">
                       Difficulty Level
                     </label>
-                    <select
-                      value={difficulty}
-                      onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                      className="w-full rounded-xl border border-mahogany/20 bg-white/70 backdrop-blur-sm px-4 py-3 text-mahogany ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold transition-all shadow-sm"
-                    >
-                      {DIFFICULTY_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                    <Select value={difficulty} onValueChange={(value) => setDifficulty(value as Difficulty)}>
+                      <SelectTrigger className="w-full rounded-xl border-mahogany/20 bg-white/70 backdrop-blur-sm px-4 py-6 text-mahogany ring-offset-background focus:ring-2 focus:ring-gold transition-all shadow-sm text-base">
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-cream border-mahogany/20">
+                        {DIFFICULTY_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value} className="focus:bg-gold/20 focus:text-mahogany text-mahogany cursor-pointer">
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -278,15 +288,18 @@ export function SetupPage() {
                       </label>
                       <span className="text-xs text-warmBrown/60 uppercase font-medium">Optional</span>
                     </div>
-                    <select
-                      value={hymnCountry}
-                      onChange={(e) => setHymnCountry(e.target.value)}
-                      className="w-full rounded-xl border border-mahogany/20 bg-white/70 backdrop-blur-sm px-4 py-3 text-mahogany ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold transition-all shadow-sm"
-                    >
-                      {HYMN_COUNTRIES.map((opt) => (
-                        <option key={opt.value || 'any'} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                    <Select value={hymnCountry || 'any'} onValueChange={(value) => setHymnCountry(value === 'any' ? '' : value)}>
+                      <SelectTrigger className="w-full rounded-xl border-mahogany/20 bg-white/70 backdrop-blur-sm px-4 py-6 text-mahogany ring-offset-background focus:ring-2 focus:ring-gold transition-all shadow-sm text-base">
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-cream border-mahogany/20">
+                        {HYMN_COUNTRIES.map((opt) => (
+                          <SelectItem key={opt.value || 'any'} value={opt.value || 'any'} className="focus:bg-gold/20 focus:text-mahogany text-mahogany cursor-pointer">
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <p className="text-xs text-warmBrown/70 mt-2 flex items-center gap-1">
                       <Sparkles className="w-3 h-3 text-gold" />
                       Affects <i>Hum a Hymn</i> and song suggestions
