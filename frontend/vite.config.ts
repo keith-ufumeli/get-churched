@@ -12,8 +12,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Optional: proxy /api for non-admin requests; admin uses VITE_API_URL (backend) directly
-      '/api': { target: 'http://localhost:3001', changeOrigin: true },
+      // For local development, point API calls to the local backend.
+      // In production, the built frontend should use VITE_API_URL directly.
+      '/api': {
+        target: process.env.VITE_API_URL || 'http://localhost:3001',
+        changeOrigin: true
+      },
     },
   },
 })
