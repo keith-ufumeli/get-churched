@@ -3,6 +3,7 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Play, Trophy, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PartyIllustration } from '@/components/PartyIllustration'
 
 // Production-grade animation variants
 const containerVariants: Variants = {
@@ -32,7 +33,7 @@ export function HomePage() {
       initial="hidden"
       animate="show"
       exit="exit"
-      className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden bg-parchment font-sans"
+      className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden bg-parchment font-sans"
     >
       {/* 1. Background Implementation */}
       <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
@@ -49,68 +50,80 @@ export function HomePage() {
         />
       </div>
 
-      {/* 2. Interactive Content */}
-      <div className="relative z-10 flex flex-col items-center w-full max-w-2xl text-center">
+      {/* 2. Interactive Content (Two-Column Layout) */}
+      <div className="relative z-10 w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         
-        {/* Logo */}
-        <motion.div variants={itemFadeUp} className="mb-4">
-          <img
-            src="/logos/get-churched-logo.png"
-            alt="Get Churched"
-            className="w-full h-auto max-w-[280px] sm:max-w-md drop-shadow-xl"
-            style={{ willChange: 'transform' }}
-          />
-        </motion.div>
-
-        {/* Subheading - Emotional Enhancer */}
-        <motion.div variants={itemFadeUp} className="mb-12 flex items-center justify-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-600/70" />
-          <p className="text-mahogany/80 font-medium text-lg sm:text-xl tracking-wide">
-            Gather. Rejoice. Connect.
-          </p>
-          <Sparkles className="w-4 h-4 text-amber-600/70" />
-        </motion.div>
-
-        {/* CTAs */}
+        {/* Left Column - Illustration (Hidden on mobile/tablet) */}
         <motion.div 
-          variants={itemFadeUp} 
-          className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto"
+          variants={itemFadeUp}
+          className="hidden lg:flex justify-center items-center pointer-events-none"
         >
-          {/* Primary CTA */}
-          <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              onClick={() => navigate('/setup')}
-              className={cn(
-                "relative group overflow-hidden w-full sm:w-auto px-8 py-7 text-lg shadow-xl shadow-amber-900/10",
-                "bg-gradient-to-b from-mahogany to-[#5A2E2A] border font-semibold border-gold text-cream transition-all duration-300",
-                "hover:shadow-amber-700/30 hover:shadow-2xl hover:border-amber-300"
-              )}
-            >
-              {/* Shimmer Effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
-              <Play className="w-5 h-5 mr-2 fill-current opacity-90" />
-              Start Game
-            </Button>
+          <PartyIllustration className="w-full max-w-lg drop-shadow-2xl" />
+        </motion.div>
+
+        {/* Right Column - Brand & CTAs */}
+        <div className="flex flex-col items-center text-center">
+          {/* Logo */}
+          <motion.div variants={itemFadeUp} className="mb-4">
+            <img
+              src="/logos/get-churched-logo.png"
+              alt="Get Churched"
+              className="w-full h-auto max-w-[280px] sm:max-w-md drop-shadow-xl"
+              style={{ willChange: 'transform' }}
+            />
           </motion.div>
 
-          {/* Secondary CTA */}
-          <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
-            <Button
-              onClick={() => navigate('/scoreboard')}
-              variant="outline"
-              className={cn(
-                "w-full sm:w-auto px-8 py-7 text-lg shadow-md font-semibold bg-cream/80 backdrop-blur-sm",
-                "border-mahogany/30 text-mahogany transition-all duration-300",
-                "hover:bg-cream hover:border-mahogany hover:shadow-lg"
-              )}
-            >
-              <Trophy className="w-5 h-5 mr-2 opacity-80" />
-              View Leaderboard
-            </Button>
+          {/* Subheading - Emotional Enhancer */}
+          <motion.div variants={itemFadeUp} className="mb-12 flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-600/70" />
+            <p className="text-mahogany/80 font-medium text-lg sm:text-xl tracking-wide">
+              Gather. Rejoice. Connect.
+            </p>
+            <Sparkles className="w-4 h-4 text-amber-600/70" />
           </motion.div>
-        </motion.div>
+
+          {/* CTAs */}
+          <motion.div 
+            variants={itemFadeUp} 
+            className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto"
+          >
+            {/* Primary CTA */}
+            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={() => navigate('/setup')}
+                className={cn(
+                  "relative group overflow-hidden w-full sm:w-auto px-8 py-7 text-lg shadow-xl shadow-amber-900/10",
+                  "bg-gradient-to-b from-mahogany to-[#5A2E2A] border font-semibold border-gold text-cream transition-all duration-300",
+                  "hover:shadow-amber-700/30 hover:shadow-2xl hover:border-amber-300"
+                )}
+              >
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
+                <Play className="w-5 h-5 mr-2 fill-current opacity-90" />
+                Start Game
+              </Button>
+            </motion.div>
+
+            {/* Secondary CTA */}
+            <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                onClick={() => navigate('/scoreboard')}
+                variant="outline"
+                className={cn(
+                  "w-full sm:w-auto px-8 py-7 text-lg shadow-md font-semibold bg-cream/80 backdrop-blur-sm",
+                  "border-mahogany/30 text-mahogany transition-all duration-300",
+                  "hover:bg-cream hover:border-mahogany hover:shadow-lg"
+                )}
+              >
+                <Trophy className="w-5 h-5 mr-2 opacity-80" />
+                View Leaderboard
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
         
       </div>
     </motion.div>
   )
 }
+
