@@ -41,7 +41,7 @@ export function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-100/30 via-transparent to-transparent" />
         {/* Sun overlay asset */}
         <motion.img
-          src="/assets/sun_light_effect_overlay.png"
+          src="/images/sun_light_effect_overlay.png"
           alt=""
           aria-hidden="true"
           animate={prefersReducedMotion ? {} : { opacity: [0.3, 0.5, 0.3], scale: [1, 1.02, 1] }}

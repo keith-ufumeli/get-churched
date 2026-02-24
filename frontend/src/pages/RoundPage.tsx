@@ -201,7 +201,7 @@ export function RoundPage() {
       <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-100/30 via-transparent to-transparent" />
         <motion.img
-          src="/assets/sun_light_effect_overlay.png"
+          src="/images/sun_light_effect_overlay.png"
           alt=""
           aria-hidden="true"
           animate={prefersReducedMotion ? {} : { opacity: [0.25, 0.4, 0.25], scale: [1, 1.02, 1] }}
