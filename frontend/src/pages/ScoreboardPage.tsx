@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGame } from '@/hooks/useGame'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { saveSession, fetchLeaderboard } from '@/lib/api'
+import { saveSession, fetchLeaderboard, saveLeaderboardEntry } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -55,16 +55,12 @@ export function ScoreboardPage() {
         roundsPerMode: state.totalRoundsForMode || undefined,
         difficulty: state.difficulty,
       })
-      return fetch('/api/leaderboard', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: data.displayName,
-          teamName: data.teamName,
-          score: winner?.score || 0,
-          sessionId: state.sessionId,
-        }),
-      }).then((res) => res.json())
+      return saveLeaderboardEntry({
+        displayName: data.displayName,
+        teamName: data.teamName,
+        score: winner?.score || 0,
+        sessionId: state.sessionId!,
+      })
     },
     onSuccess: () => {
       toast.success('Saved to leaderboard!')
