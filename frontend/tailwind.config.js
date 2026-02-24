@@ -7,6 +7,11 @@ const config = {
   ],
   theme: {
   	extend: {
+  		keyframes: {
+  			shimmer: {
+  				'100%': { transform: 'translateX(200%)' }
+  			}
+  		},
   		fontFamily: {
   			sans: [
   				'Nunito',
