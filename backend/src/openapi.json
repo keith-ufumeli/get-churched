@@ -6,7 +6,8 @@
     "version": "1.0.0"
   },
   "servers": [
-    { "url": "http://localhost:3001", "description": "Development" }
+    { "url": "http://localhost:3001", "description": "Development" },
+    { "url": "https://get-churched-api.onrender.com", "description": "Production" }
   ],
   "paths": {
     "/api/health": {
