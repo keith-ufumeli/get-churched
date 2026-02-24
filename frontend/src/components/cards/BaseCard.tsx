@@ -51,26 +51,29 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
     >
       <Card className="p-5 sm:p-8 space-y-6 sm:space-y-8 bg-white/95 backdrop-blur-md border-gold/20 shadow-2xl shadow-mahogany/10 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-cream/50 to-transparent pointer-events-none" />
-        <div className="relative flex items-center justify-between z-10">
+        <div className="relative flex items-start sm:items-center justify-between z-10 gap-4 sm:gap-8">
           <motion.div
             initial={{ rotate: -10, scale: 0.8 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 200 }}
+            className="shrink-0"
           >
             <Badge
-              className="text-sm font-bold px-4 py-1.5 shadow-sm"
+              className="text-sm sm:text-base font-bold px-4 py-1.5 shadow-sm"
               style={{ backgroundColor: modeColor, color: 'white', border: 'none' }}
             >
               {modeLabel}
             </Badge>
           </motion.div>
           {duration > 0 && (
-            <Timer
-              duration={duration}
-              timeLeft={timer.timeLeft}
-              onComplete={timer.pause}
-              color={`bg-[${modeColor}]`}
-            />
+            <div className="flex-1 w-full max-w-sm ml-auto">
+              <Timer
+                duration={duration}
+                timeLeft={timer.timeLeft}
+                onComplete={timer.pause}
+                color={`bg-[${modeColor}]`}
+              />
+            </div>
           )}
         </div>
 
