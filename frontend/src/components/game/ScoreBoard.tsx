@@ -16,9 +16,12 @@ export function ScoreBoard({ teams, currentTeamIndex, className }: ScoreBoardPro
   const sortedTeams = [...teams].sort((a, b) => (b.score || 0) - (a.score || 0))
 
   return (
-    <div className={cn('space-y-3', className)}>
-      <h3 className="text-lg font-semibold text-mahogany mb-4">Scores</h3>
-      <div className="space-y-2">
+    <div className={cn('space-y-4', className)}>
+      <div className="flex items-center gap-2 mb-2">
+        <Trophy className="w-5 h-5 text-gold" />
+        <h3 className="text-xl font-bold text-mahogany uppercase tracking-wider">Scoreboard</h3>
+      </div>
+      <div className="space-y-3">
         <AnimatePresence mode="popLayout">
           {sortedTeams.map((team, index) => {
             const originalIndex = teams.findIndex((t) => t.name === team.name)
@@ -33,42 +36,62 @@ export function ScoreBoard({ teams, currentTeamIndex, className }: ScoreBoardPro
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
+                className={cn(isCurrent && 'z-10 relative')}
               >
                 <Card
                   className={cn(
-                    'p-4 transition-all min-h-[44px] flex items-center',
-                    isCurrent && 'ring-2 ring-gold shadow-lg',
-                    isLeader && 'bg-gradient-to-r from-gold/10 to-transparent'
+                    'p-5 transition-all duration-300 flex items-center border border-mahogany/10 relative overflow-hidden',
+                    isCurrent ? 'ring-2 ring-gold shadow-xl scale-105 bg-white bg-opacity-95 backdrop-blur-md' : 'bg-white/70 hover:bg-white/90 backdrop-blur-sm hover:border-gold/40',
+                    isLeader && !isCurrent && 'bg-gradient-to-br from-gold/5 via-white/80 to-transparent'
                   )}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {isLeader && <Trophy className="h-5 w-5 text-gold" />}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-mahogany">{team.name}</span>
+                  <div className="relative z-10 flex items-center justify-between w-full gap-4">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      {isLeader ? (
+                        <div className="relative shrink-0">
+                          <div className="absolute inset-0 bg-gold blur-sm opacity-40 rounded-full" />
+                          <Trophy className="h-6 w-6 text-gold relative z-10 drop-shadow-sm" />
+                        </div>
+                      ) : (
+                        <div className="w-6 shrink-0" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 relative">
+                          <span className={cn("font-bold text-mahogany tracking-tight truncate", isCurrent ? 'text-xl' : 'text-lg')}>
+                            {team.name}
+                          </span>
                           {isCurrent && (
-                            <Badge variant="outline" className="border-gold text-gold text-xs">
+                            <Badge variant="outline" className="shrink-0 border-gold bg-gold/10 text-gold text-[10px] uppercase font-bold tracking-wider px-2 py-0 border drop-shadow-sm">
                               Current
                             </Badge>
                           )}
                         </div>
-                        {team.color && (
+                        {team.color ? (
                           <div
-                            className="h-1 w-12 mt-1 rounded"
+                            className="h-1.5 w-12 mt-1.5 rounded-full shadow-inner border border-black/5"
                             style={{ backgroundColor: team.color }}
                           />
+                        ) : (
+                          <div className="h-1.5 w-12 mt-1.5 rounded-full bg-black/5 border border-dashed border-black/20" />
                         )}
                       </div>
                     </div>
-                    <motion.div
-                      key={team.score || 0}
-                      initial={{ scale: 1.2, color: THEME_COLORS.gold }}
-                      animate={{ scale: 1, color: THEME_COLORS.mahogany }}
-                      className="text-2xl font-bold text-mahogany tabular-nums"
-                    >
-                      {team.score || 0}
-                    </motion.div>
+                    
+                    {/* Score display */}
+                    <div className="shrink-0 text-right">
+                      <motion.div
+                        key={team.score || 0}
+                        initial={{ scale: 1.5, color: THEME_COLORS.gold }}
+                        animate={{ scale: 1, color: THEME_COLORS.mahogany }}
+                        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                        className={cn(
+                          "font-black tabular-nums transition-all drop-shadow-sm", 
+                          isCurrent ? 'text-4xl text-mahogany' : 'text-3xl text-mahogany/90'
+                        )}
+                      >
+                        {team.score || 0}
+                      </motion.div>
+                    </div>
                   </div>
                 </Card>
               </motion.div>

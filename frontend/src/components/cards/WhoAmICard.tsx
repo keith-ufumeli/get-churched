@@ -12,7 +12,7 @@ export function WhoAmICard({ card, mode, onScore }: WhoAmICardProps) {
 
   return (
     <BaseCard card={card} mode={mode} onScore={onScore}>
-      <p className="text-2xl font-serif text-center text-mahogany px-4">
+      <p className="text-3xl sm:text-4xl font-serif font-bold text-center text-mahogany tracking-tight px-4 leading-tight">
         {text}
       </p>
     </BaseCard>

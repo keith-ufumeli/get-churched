@@ -30,25 +30,25 @@ export function FillInBlankCard({ card, mode, onScore }: FillInBlankCardProps) {
 
   return (
     <BaseCard card={card} mode={mode} onScore={onScore} showScoreButtons={false}>
-      <div className="w-full space-y-6">
-        <p className="text-xl font-serif text-center text-mahogany px-4 leading-relaxed">
+      <div className="w-full space-y-8">
+        <p className="text-2xl sm:text-3xl font-serif text-center text-mahogany px-4 leading-relaxed font-bold tracking-tight">
           {fillCard.verse}
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-sm mx-auto">
           <Input
-            placeholder="Enter your answer"
+            placeholder="Type missing word..."
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !revealed && handleCheck()}
+            onKeyDown={(e) => e.key === 'Enter' && !revealed && answer.trim() && handleCheck()}
             disabled={revealed}
-            className="text-center text-lg"
+            className="text-center text-xl h-14 bg-white/50 backdrop-blur-sm border-gold/40 focus-visible:ring-gold focus-visible:ring-2 shadow-inner"
           />
 
           <Button
             onClick={handleCheck}
             disabled={revealed || !answer.trim()}
-            className="w-full"
+            className="w-full h-14 text-lg font-bold bg-mahogany hover:bg-[#5A2E2A] text-cream"
             size="lg"
           >
             Check Answer

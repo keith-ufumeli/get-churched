@@ -28,12 +28,12 @@ export function TriviaCard({ card, mode, onScore }: TriviaCardProps) {
 
   return (
     <BaseCard card={card} mode={mode} onScore={onScore} showScoreButtons={false}>
-      <div className="w-full space-y-6">
-        <p className="text-xl font-serif text-center text-mahogany px-4">
+      <div className="w-full space-y-6 sm:space-y-8">
+        <p className="text-2xl sm:text-3xl font-serif font-bold text-center text-mahogany px-4 leading-snug">
           {triviaCard.q}
         </p>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {triviaCard.options.map((option, index) => {
             const isCorrect = option === triviaCard.a
             const isSelected = selectedAnswer === option
@@ -50,7 +50,7 @@ export function TriviaCard({ card, mode, onScore }: TriviaCardProps) {
                   onClick={() => handleSelect(option)}
                   disabled={revealed}
                   variant={showResult ? (isCorrect ? 'default' : 'destructive') : 'outline'}
-                  className="w-full h-auto p-4 text-left justify-start relative"
+                  className="w-full h-auto min-h-[56px] p-4 text-left justify-start relative text-base sm:text-lg font-medium"
                 >
                   <AnimatePresence>
                     {showResult && (
@@ -78,10 +78,10 @@ export function TriviaCard({ card, mode, onScore }: TriviaCardProps) {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className="text-center pt-2"
           >
-            <p className="text-sm text-warmBrown">
-              Correct answer: <span className="font-semibold text-mahogany">{triviaCard.a}</span>
+            <p className="text-base sm:text-lg text-warmBrown border-t border-mahogany/10 pt-4">
+              Correct answer: <span className="font-bold text-mahogany">{triviaCard.a}</span>
             </p>
           </motion.div>
         )}

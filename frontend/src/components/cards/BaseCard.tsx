@@ -8,6 +8,7 @@ import type { CardMode, CardResponse } from '@/types/game'
 import { Timer } from '@/components/game/Timer'
 import { useTimer } from '@/hooks/useTimer'
 import { MODE_COLORS, MODE_LABELS, MODE_DURATIONS } from '@/lib/gameModes'
+import { Check, X } from 'lucide-react'
 
 interface BaseCardProps {
   card: CardResponse
@@ -48,15 +49,16 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
       transition={{ duration: 0.3 }}
       className={cn('w-full', className)}
     >
-      <Card className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-        <div className="flex items-center justify-between">
+      <Card className="p-5 sm:p-8 space-y-6 sm:space-y-8 bg-white/95 backdrop-blur-md border-gold/20 shadow-2xl shadow-mahogany/10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-cream/50 to-transparent pointer-events-none" />
+        <div className="relative flex items-center justify-between z-10">
           <motion.div
             initial={{ rotate: -10, scale: 0.8 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 200 }}
           >
             <Badge
-              className="text-sm font-semibold px-3 py-1"
+              className="text-sm font-bold px-4 py-1.5 shadow-sm"
               style={{ backgroundColor: modeColor, color: 'white', border: 'none' }}
             >
               {modeLabel}
@@ -72,21 +74,22 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
           )}
         </div>
 
-        <div className="min-h-[180px] sm:min-h-[200px] flex items-center justify-center py-4">
+        <div className="relative z-10 min-h-[180px] sm:min-h-[200px] flex items-center justify-center py-6">
           {children}
         </div>
 
         {showScoreButtons && (
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center sm:px-8 pt-4 border-t border-mahogany/10">
             <Button
               onClick={() => {
                 timer.pause()
                 onScore(2)
               }}
-              className="bg-green-600 hover:bg-green-700 text-white min-h-[44px] min-w-[44px] px-6 py-3 text-base"
+              className="bg-green-600 hover:bg-green-700 text-white min-h-[56px] px-8 text-lg font-bold shadow-md hover:shadow-lg active:scale-95 transition-all w-full sm:w-auto"
               size="lg"
             >
-              Correct (+2pts)
+              <Check className="w-5 h-5 mr-2" />
+              Correct (+2)
             </Button>
             <Button
               onClick={() => {
@@ -94,10 +97,11 @@ export function BaseCard({ card, mode, onScore, children, className, showScoreBu
                 onScore(0)
               }}
               variant="destructive"
-              className="min-h-[44px] min-w-[44px] px-6 py-3 text-base"
+              className="min-h-[56px] px-8 text-lg font-bold shadow-md hover:shadow-lg active:scale-95 transition-all w-full sm:w-auto"
               size="lg"
             >
-              Incorrect (0pts)
+              <X className="w-5 h-5 mr-2" />
+              Incorrect (0)
             </Button>
           </div>
         )}

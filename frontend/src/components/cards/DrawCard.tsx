@@ -35,7 +35,7 @@ export function DrawCard({ card, mode, onScore }: DrawCardProps) {
   return (
     <BaseCard card={card} mode={mode} onScore={onScore}>
       <div className="w-full space-y-4">
-        <p className="text-xl font-serif text-center text-mahogany px-4">
+        <p className="text-3xl sm:text-4xl font-serif font-bold text-center text-mahogany tracking-tight px-4 leading-tight">
           {text}
         </p>
 
